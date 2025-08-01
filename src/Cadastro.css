@@ -1,0 +1,200 @@
+.cadastro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.cadastro-card {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.user-icon {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.user-icon svg {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cadastro-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.cadastro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 15px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #646cff;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.cadastro-btn {
+  background: linear-gradient(135deg, #646cff 0%, #535bf2 100%);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.cadastro-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(100, 108, 255, 0.3);
+}
+
+.login-link {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.login-account-btn {
+  background: none;
+  border: none;
+  color: #646cff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.95rem;
+}
+
+.login-account-btn:hover {
+  color: #535bf2;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .cadastro-container {
+    padding: 0.75rem;
+  }
+  
+  .cadastro-card {
+    padding: 2rem 1.5rem;
+    max-width: 100%;
+    border-radius: 16px;
+  }
+  
+  .cadastro-title {
+    font-size: 1.6rem;
+  }
+  
+  .input-group input {
+    padding: 1rem 1rem 1rem 3rem;
+    font-size: 1rem;
+  }
+  
+  .cadastro-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .cadastro-container {
+    padding: 0.5rem;
+  }
+  
+  .cadastro-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 12px;
+  }
+  
+  .user-icon svg {
+    width: 50px;
+    height: 50px;
+    padding: 12px;
+  }
+  
+  .cadastro-title {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .cadastro-form {
+    gap: 1.25rem;
+  }
+  
+  .input-group input {
+    padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+    font-size: 0.95rem;
+  }
+  
+  .cadastro-btn {
+    padding: 0.875rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .cadastro-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .cadastro-title {
+    font-size: 1.25rem;
+  }
+  
+  .cadastro-form {
+    gap: 1rem;
+  }
+  
+  .login-link {
+    font-size: 0.85rem;
+  }
+}

@@ -1,0 +1,18 @@
+# Comandos para criar repositório TCCAMP no GitHub
+
+# 1. Primeiro, certifique-se de estar logado no GitHub CLI:
+gh auth login
+
+# 2. Criar o repositório:
+gh repo create TCCAMP --public --description "Site TCCAMP"
+
+# 3. Clonar o repositório:
+git clone https://github.com/SEU_USERNAME/TCCAMP.git
+
+# 4. Navegar para o diretório:
+cd TCCAMP
+
+# 5. Adicionar arquivos e fazer primeiro commit:
+git add .
+git commit -m "Initial commit"
+git push origin main
