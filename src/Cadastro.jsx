@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import './Login.css'
+import './Cadastro.css'
 
-function Login({ onGoToCadastro, onLogin }) {
+function Cadastro({ onGoToLogin, onCadastro }) {
   const [formData, setFormData] = useState({
     usuario: '',
     senha: ''
@@ -15,38 +15,28 @@ function Login({ onGoToCadastro, onLogin }) {
   }
 
   useEffect(() => {
-    document.title = 'PharmaLife - Login'
+    document.title = 'PharmaLife - Cadastro'
   }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Login:', formData)
-    alert('Login realizado com sucesso!')
-    sessionStorage.setItem('userName', formData.usuario)
-    onLogin()
+    console.log('Cadastro:', formData)
+    alert('Cadastro realizado com sucesso!')
+    onCadastro()
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="hospital-icon">
-          <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
-            <rect x="20" y="30" width="60" height="50" rx="3" fill="#3b82f6" opacity="0.9"/>
-            <rect x="25" y="25" width="50" height="40" rx="2" fill="#60a5fa" opacity="0.7"/>
-            <path d="M45 35 L55 35 M50 30 L50 40" stroke="white" stroke-width="3" stroke-linecap="round"/>
-            <rect x="30" y="65" width="8" height="15" fill="#1e40af"/>
-            <rect x="62" y="65" width="8" height="15" fill="#1e40af"/>
-            <rect x="35" y="45" width="6" height="4" fill="white" opacity="0.8"/>
-            <rect x="59" y="45" width="6" height="4" fill="white" opacity="0.8"/>
-            <rect x="35" y="52" width="6" height="4" fill="white" opacity="0.8"/>
-            <rect x="59" y="52" width="6" height="4" fill="white" opacity="0.8"/>
-            <path d="M20 30 L50 15 L80 30" stroke="#1e40af" stroke-width="2" fill="none"/>
+    <div className="cadastro-container">
+      <div className="cadastro-card">
+        <div className="user-icon">
+          <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#646cff"/>
           </svg>
         </div>
         
-        <h1 className="login-title">Login</h1>
+        <h1 className="cadastro-title">Cadastro</h1>
         
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="cadastro-form">
           <div className="input-group">
             <div className="input-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -79,15 +69,14 @@ function Login({ onGoToCadastro, onLogin }) {
             />
           </div>
           
-          <button type="submit" className="login-btn">
-            Login
+          <button type="submit" className="cadastro-btn">
+            Cadastro
           </button>
         </form>
         
         <div className="signup-link">
-          <span>Não tem conta? </span>
-          <button type="button" className="create-account-btn" onClick={onGoToCadastro}>
-            Criar uma conta
+          <button type="button" className="create-account-btn" onClick={onGoToLogin}>
+            Login
           </button>
         </div>
       </div>
@@ -95,4 +84,4 @@ function Login({ onGoToCadastro, onLogin }) {
   )
 }
 
-export default Login
+export default Cadastro

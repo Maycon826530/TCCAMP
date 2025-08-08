@@ -1,16 +1,22 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Login from './Login'
 import Home from './Home'
 import './App.css'
 import './Cadastro.css'
 
-function Cadastro({ onGoToLogin }) {
+function Cadastro({ onGoToLogin, onLogin }) {
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
     senha: '',
-    confirmarSenha: ''
+    confirmarSenha: '',
+    idade: '',
+    comorbidade: ''
   })
+
+  useEffect(() => {
+    document.title = 'PharmaLife - Cadastro'
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
@@ -29,21 +35,35 @@ function Cadastro({ onGoToLogin }) {
     
     console.log('Dados do usuário:', formData)
     alert('Usuário cadastrado com sucesso!')
+    onLogin(formData)
     
     setFormData({
       nome: '',
       email: '',
       senha: '',
-      confirmarSenha: ''
+      confirmarSenha: '',
+      idade: '',
+      comorbidade: ''
     })
   }
 
   return (
     <div className="cadastro-container">
       <div className="cadastro-card">
-        <div className="user-icon">
-          <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
-            <path d="M15,14C12.33,14 7,15.33 7,18V20H23V18C23,15.33 17.67,14 15,14M6,10V7H4V10H1V12H4V15H6V12H9V10M15,12A4,4 0 0,0 19,8A4,4 0 0,0 15,4A4,4 0 0,0 11,8A4,4 0 0,0 15,12Z" fill="#646cff"/>
+
+        
+        <div className="hospital-icon">
+          <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+            <rect x="20" y="30" width="60" height="50" rx="3" fill="#3b82f6" opacity="0.9"/>
+            <rect x="25" y="25" width="50" height="40" rx="2" fill="#60a5fa" opacity="0.7"/>
+            <path d="M45 35 L55 35 M50 30 L50 40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <rect x="30" y="65" width="8" height="15" fill="#1e40af"/>
+            <rect x="62" y="65" width="8" height="15" fill="#1e40af"/>
+            <rect x="35" y="45" width="6" height="4" fill="white" opacity="0.8"/>
+            <rect x="59" y="45" width="6" height="4" fill="white" opacity="0.8"/>
+            <rect x="35" y="52" width="6" height="4" fill="white" opacity="0.8"/>
+            <rect x="59" y="52" width="6" height="4" fill="white" opacity="0.8"/>
+            <path d="M20 30 L50 15 L80 30" stroke="#1e40af" stroke-width="2" fill="none"/>
           </svg>
         </div>
         
@@ -59,10 +79,43 @@ function Cadastro({ onGoToLogin }) {
             <input
               type="text"
               name="nome"
-              placeholder="Nome completo"
+              placeholder="Nome de usuário"
               value={formData.nome}
               onChange={handleChange}
               required
+            />
+          </div>
+          
+          <div className="input-group">
+            <div className="input-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z" fill="#999"/>
+              </svg>
+            </div>
+            <input
+              type="number"
+              name="idade"
+              placeholder="Idade"
+              value={formData.idade}
+              onChange={handleChange}
+              min="1"
+              max="120"
+              required
+            />
+          </div>
+          
+          <div className="input-group">
+            <div className="input-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z" fill="#999"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              name="comorbidade"
+              placeholder="Comorbidade (opcional)"
+              value={formData.comorbidade}
+              onChange={handleChange}
             />
           </div>
           
@@ -136,9 +189,12 @@ function App() {
     return sessionStorage.getItem('isLoggedIn') === 'true'
   })
 
-  const handleLogin = () => {
+  const handleLogin = (userData) => {
     setIsLoggedIn(true)
     sessionStorage.setItem('isLoggedIn', 'true')
+    if (userData && userData.nome) {
+      sessionStorage.setItem('userName', userData.nome)
+    }
   }
 
   const handleLogout = () => {
@@ -154,7 +210,7 @@ function App() {
     return <Login onGoToCadastro={() => setCurrentPage('cadastro')} onLogin={handleLogin} />
   }
 
-  return <Cadastro onGoToLogin={() => setCurrentPage('login')} />
+  return <Cadastro onGoToLogin={() => setCurrentPage('login')} onLogin={handleLogin} />
 }
 
 export default App
