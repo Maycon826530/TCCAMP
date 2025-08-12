@@ -3,6 +3,7 @@ import Login from './Login'
 import Home from './Home'
 import './App.css'
 import './Cadastro.css'
+import './Accessibility.css'
 
 function Cadastro({ onGoToLogin, onLogin }) {
   const [formData, setFormData] = useState({
@@ -188,6 +189,9 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return sessionStorage.getItem('isLoggedIn') === 'true'
   })
+  const [accessibilityMode, setAccessibilityMode] = useState(() => {
+    return localStorage.getItem('accessibilityMode') === 'true'
+  })
 
   const handleLogin = (userData) => {
     setIsLoggedIn(true)
@@ -202,15 +206,47 @@ function App() {
     sessionStorage.removeItem('isLoggedIn')
   }
 
+  const toggleAccessibilityMode = () => {
+    const newMode = !accessibilityMode
+    setAccessibilityMode(newMode)
+    localStorage.setItem('accessibilityMode', newMode.toString())
+  }
+
   if (isLoggedIn) {
     return <Home onLogout={handleLogout} />
   }
 
   if (currentPage === 'login') {
-    return <Login onGoToCadastro={() => setCurrentPage('cadastro')} onLogin={handleLogin} />
+    return (
+      <div className={accessibilityMode ? 'accessibility-mode' : ''}>
+        <div className="accessibility-header">
+          <button 
+            className="accessibility-toggle-login"
+            onClick={toggleAccessibilityMode}
+            title={accessibilityMode ? 'Desativar modo de acessibilidade' : 'Ativar modo de acessibilidade - Letras maiores'}
+          >
+            {accessibilityMode ? '🔍 Modo Normal' : '🔍 Letras Grandes'}
+          </button>
+        </div>
+        <Login onGoToCadastro={() => setCurrentPage('cadastro')} onLogin={handleLogin} />
+      </div>
+    )
   }
 
-  return <Cadastro onGoToLogin={() => setCurrentPage('login')} onLogin={handleLogin} />
+  return (
+    <div className={accessibilityMode ? 'accessibility-mode' : ''}>
+      <div className="accessibility-header">
+        <button 
+          className="accessibility-toggle-login"
+          onClick={toggleAccessibilityMode}
+          title={accessibilityMode ? 'Desativar modo de acessibilidade' : 'Ativar modo de acessibilidade - Letras maiores'}
+        >
+          {accessibilityMode ? '🔍 Modo Normal' : '🔍 Letras Grandes'}
+        </button>
+      </div>
+      <Cadastro onGoToLogin={() => setCurrentPage('login')} onLogin={handleLogin} />
+    </div>
+  )
 }
 
 export default App

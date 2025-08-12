@@ -1,0 +1,178 @@
+.sobre-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e3f2fd 0%, #b3e5fc 100%);
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sobre-content {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  max-width: 900px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.sobre-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.sobre-header h1 {
+  color: #333;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.logo-sobre {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.projeto-info {
+  margin-bottom: 3rem;
+}
+
+.projeto-info h2 {
+  color: #1976d2;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 0.5rem;
+}
+
+.projeto-info p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.equipe-info {
+  margin-bottom: 3rem;
+}
+
+.equipe-info h2 {
+  color: #1976d2;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 0.5rem;
+}
+
+.integrantes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.integrante-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.integrante-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border-color: #e3f2fd;
+}
+
+.integrante-avatar {
+  background: #e3f2fd;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem auto;
+}
+
+.integrante-card h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.integrante-card p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.tecnologias {
+  text-align: center;
+}
+
+.tecnologias h2 {
+  color: #1976d2;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e3f2fd;
+  padding-bottom: 0.5rem;
+}
+
+.tech-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.tech-item {
+  background: #1976d2;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .sobre-container {
+    padding: 1rem;
+  }
+  
+  .sobre-content {
+    padding: 2rem;
+  }
+  
+  .sobre-header h1 {
+    font-size: 2rem;
+  }
+  
+  .projeto-info h2,
+  .equipe-info h2,
+  .tecnologias h2 {
+    font-size: 1.5rem;
+  }
+  
+  .integrantes-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+  }
+  
+  .integrante-card {
+    padding: 1rem;
+  }
+  
+  .tech-list {
+    gap: 0.5rem;
+  }
+  
+  .tech-item {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

@@ -1,0 +1,573 @@
+/* Melhorias de Acessibilidade para Idosos e Pessoas com Deficiência */
+
+/* Tamanhos de fonte maiores para melhor legibilidade */
+.accessibility-mode {
+  font-size: 18px !important;
+  line-height: 1.8 !important;
+}
+
+.accessibility-mode * {
+  font-size: inherit !important;
+}
+
+/* Títulos ainda maiores */
+.accessibility-mode h1 {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+}
+
+.accessibility-mode h2 {
+  font-size: 2.2rem !important;
+  font-weight: 700 !important;
+}
+
+.accessibility-mode h3 {
+  font-size: 1.8rem !important;
+  font-weight: 600 !important;
+}
+
+.accessibility-mode h4 {
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+}
+
+/* Botões maiores e mais fáceis de clicar */
+.accessibility-mode button {
+  min-height: 60px !important;
+  padding: 1.5rem 2rem !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  border-radius: 15px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.accessibility-mode .nav-buttons button {
+  min-height: 70px !important;
+  padding: 1.8rem 2.5rem !important;
+  font-size: 1.3rem !important;
+  margin-bottom: 0.8rem !important;
+}
+
+/* Contraste melhorado */
+.accessibility-mode {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.accessibility-mode .sidebar {
+  background: #f8f9fa !important;
+  border-right: 3px solid #333333 !important;
+}
+
+.accessibility-mode .sidebar-header {
+  background: #2c3e50 !important;
+  color: #ffffff !important;
+}
+
+.accessibility-mode .nav-buttons button {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #333333 !important;
+}
+
+.accessibility-mode .nav-buttons button:hover {
+  background: #e9ecef !important;
+  color: #000000 !important;
+  border: 3px solid #007bff !important;
+}
+
+.accessibility-mode .nav-buttons button.active {
+  background: #007bff !important;
+  color: #ffffff !important;
+  border: 3px solid #0056b3 !important;
+}
+
+/* Cards com melhor contraste */
+.accessibility-mode .card {
+  background: #ffffff !important;
+  border: 3px solid #333333 !important;
+  color: #000000 !important;
+  padding: 2rem !important;
+  margin-bottom: 1.5rem !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+.accessibility-mode .card h3 {
+  color: #000000 !important;
+  border-bottom: 3px solid #333333 !important;
+  padding-bottom: 1rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Inputs maiores e mais visíveis */
+.accessibility-mode input,
+.accessibility-mode select,
+.accessibility-mode textarea {
+  min-height: 60px !important;
+  padding: 1.5rem !important;
+  font-size: 1.2rem !important;
+  border: 3px solid #333333 !important;
+  border-radius: 10px !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.accessibility-mode input:focus,
+.accessibility-mode select:focus,
+.accessibility-mode textarea:focus {
+  border: 4px solid #007bff !important;
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 2px !important;
+}
+
+/* Badges e status mais visíveis */
+.accessibility-mode .badge {
+  font-size: 1rem !important;
+  padding: 0.8rem 1.2rem !important;
+  font-weight: 800 !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Botões de ação principais */
+.accessibility-mode .btn-take {
+  background: #28a745 !important;
+  color: #ffffff !important;
+  border: 3px solid #1e7e34 !important;
+  font-size: 1.3rem !important;
+  min-height: 70px !important;
+  font-weight: 800 !important;
+}
+
+.accessibility-mode .btn-take:hover {
+  background: #218838 !important;
+  border: 4px solid #1e7e34 !important;
+  transform: scale(1.05) !important;
+}
+
+.accessibility-mode .btn-add {
+  background: #007bff !important;
+  color: #ffffff !important;
+  border: 3px solid #0056b3 !important;
+  font-size: 1.3rem !important;
+  min-height: 70px !important;
+  font-weight: 800 !important;
+}
+
+.accessibility-mode .btn-add:hover {
+  background: #0056b3 !important;
+  border: 4px solid #004085 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Botões de editar e excluir mais visíveis */
+.accessibility-mode .btn-edit {
+  background: #ffc107 !important;
+  color: #000000 !important;
+  border: 3px solid #e0a800 !important;
+  min-height: 60px !important;
+  min-width: 60px !important;
+  font-size: 1.5rem !important;
+}
+
+.accessibility-mode .btn-delete-small {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  border: 3px solid #c82333 !important;
+  min-height: 60px !important;
+  min-width: 60px !important;
+  font-size: 1.5rem !important;
+}
+
+/* Simplificar layout - menos informações por tela */
+.accessibility-mode .dashboard {
+  grid-template-columns: 1fr !important;
+  gap: 2rem !important;
+}
+
+.accessibility-mode .dashboard-main {
+  flex-direction: column !important;
+  gap: 2rem !important;
+}
+
+.accessibility-mode .card {
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+/* Itens de lista mais espaçados */
+.accessibility-mode .item {
+  padding: 2rem 0 !important;
+  font-size: 1.2rem !important;
+  border-bottom: 2px solid #333333 !important;
+  min-height: 80px !important;
+}
+
+.accessibility-mode .medication-item {
+  padding: 2rem 0 !important;
+  border-bottom: 3px solid #333333 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+/* Saudação mais visível */
+.accessibility-mode .user-greeting {
+  background: #2c3e50 !important;
+  color: #ffffff !important;
+  padding: 2.5rem !important;
+  margin-bottom: 2rem !important;
+  border: 3px solid #34495e !important;
+}
+
+.accessibility-mode .greeting-text {
+  font-size: 2.5rem !important;
+  font-weight: 800 !important;
+}
+
+/* Modal mais acessível */
+.accessibility-mode .modal {
+  padding: 3rem !important;
+  border: 4px solid #333333 !important;
+}
+
+.accessibility-mode .modal h3 {
+  font-size: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+/* Botões do modal */
+.accessibility-mode .btn-save {
+  background: #28a745 !important;
+  color: #ffffff !important;
+  border: 3px solid #1e7e34 !important;
+  min-height: 70px !important;
+  font-size: 1.3rem !important;
+}
+
+.accessibility-mode .btn-cancel {
+  background: #6c757d !important;
+  color: #ffffff !important;
+  border: 3px solid #545b62 !important;
+  min-height: 70px !important;
+  font-size: 1.3rem !important;
+}
+
+.accessibility-mode .btn-delete {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  border: 3px solid #c82333 !important;
+  min-height: 70px !important;
+  font-size: 1.3rem !important;
+}
+
+/* Toast mais visível */
+.accessibility-mode .toast {
+  font-size: 1.3rem !important;
+  padding: 2rem 2.5rem !important;
+  background: #2c3e50 !important;
+  color: #ffffff !important;
+  border: 3px solid #34495e !important;
+}
+
+/* Seção de ajuda mais clara */
+.accessibility-mode .help-tips {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 3px solid #28a745 !important;
+}
+
+.accessibility-mode .help-tips h3 {
+  color: #000000 !important;
+  border-bottom: 3px solid #28a745 !important;
+}
+
+.accessibility-mode .tip-item h4 {
+  color: #000000 !important;
+  font-size: 1.4rem !important;
+}
+
+.accessibility-mode .tip-item p {
+  color: #333333 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Emergência mais visível */
+.accessibility-mode .help-emergency {
+  background: #dc3545 !important;
+  color: #ffffff !important;
+  border: 4px solid #c82333 !important;
+}
+
+.accessibility-mode .emergency-number {
+  background: #ffffff !important;
+  color: #dc3545 !important;
+  font-size: 1.8rem !important;
+  font-weight: 900 !important;
+  padding: 1rem 1.5rem !important;
+  border: 3px solid #dc3545 !important;
+}
+
+/* Farmácias mais visíveis */
+.accessibility-mode .pharmacy-item {
+  padding: 2rem !important;
+  border: 3px solid #333333 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.accessibility-mode .pharmacy-name {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: #000000 !important;
+}
+
+.accessibility-mode .pharmacy-address {
+  font-size: 1.1rem !important;
+  color: #333333 !important;
+}
+
+/* Responsividade melhorada para acessibilidade */
+@media (max-width: 768px) {
+  .accessibility-mode .sidebar {
+    width: 100% !important;
+  }
+  
+  .accessibility-mode .nav-buttons {
+    flex-direction: column !important;
+    padding: 1rem !important;
+  }
+  
+  .accessibility-mode .nav-buttons button {
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .accessibility-mode .main-content {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Foco mais visível para navegação por teclado */
+.accessibility-mode *:focus {
+  outline: 4px solid #ffff00 !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 2px #000000 !important;
+}
+
+/* Botão de acessibilidade mais visível */
+.accessibility-mode .accessibility-toggle {
+  background: #28a745 !important;
+  color: #ffffff !important;
+  border: 3px solid #1e7e34 !important;
+  font-size: 1.1rem !important;
+  font-weight: 800 !important;
+  min-height: 60px !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.accessibility-mode .accessibility-toggle:hover {
+  background: #218838 !important;
+  border: 4px solid #1e7e34 !important;
+  transform: scale(1.02) !important;
+}
+
+/* Cursor pointer para todos os elementos clicáveis */
+.accessibility-mode button,
+.accessibility-mode input[type="submit"],
+.accessibility-mode input[type="button"],
+.accessibility-mode .clickable {
+  cursor: pointer !important;
+}
+
+/* Remover animações que podem causar tontura */
+.accessibility-mode * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Manter apenas transições essenciais para feedback */
+.accessibility-mode button {
+  transition: background-color 0.2s ease, transform 0.1s ease !important;
+}
+
+/* Cabeçalho de acessibilidade para login e cadastro */
+.accessibility-header {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.accessibility-toggle-login {
+  background: #007bff;
+  color: white;
+  border: 2px solid #0056b3;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.accessibility-toggle-login:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos específicos para modo acessível nas páginas de login/cadastro */
+.accessibility-mode .accessibility-toggle-login {
+  background: #28a745 !important;
+  color: #ffffff !important;
+  border: 3px solid #1e7e34 !important;
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  min-height: 60px !important;
+  padding: 1.2rem 2rem !important;
+}
+
+.accessibility-mode .accessibility-toggle-login:hover {
+  background: #218838 !important;
+  border: 4px solid #1e7e34 !important;
+  transform: scale(1.05) !important;
+}
+
+/* Melhorias para formulários de login e cadastro */
+.accessibility-mode .cadastro-container,
+.accessibility-mode .login-container {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.accessibility-mode .cadastro-card,
+.accessibility-mode .login-card {
+  background: #ffffff !important;
+  border: 4px solid #333333 !important;
+  color: #000000 !important;
+  padding: 3rem !important;
+}
+
+.accessibility-mode .cadastro-title,
+.accessibility-mode .login-title {
+  font-size: 2.5rem !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+  margin-bottom: 2rem !important;
+}
+
+.accessibility-mode .input-group input {
+  min-height: 70px !important;
+  font-size: 1.3rem !important;
+  padding: 1.5rem !important;
+  border: 3px solid #333333 !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.accessibility-mode .input-group input:focus {
+  border: 4px solid #007bff !important;
+  outline: 3px solid #ffff00 !important;
+  outline-offset: 2px !important;
+}
+
+.accessibility-mode .cadastro-btn,
+.accessibility-mode .login-btn {
+  min-height: 80px !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  background: #007bff !important;
+  color: #ffffff !important;
+  border: 3px solid #0056b3 !important;
+  padding: 1.5rem 2rem !important;
+}
+
+.accessibility-mode .cadastro-btn:hover,
+.accessibility-mode .login-btn:hover {
+  background: #0056b3 !important;
+  border: 4px solid #004085 !important;
+  transform: scale(1.05) !important;
+}
+
+.accessibility-mode .login-account-btn {
+  background: transparent !important;
+  color: #007bff !important;
+  border: 2px solid #007bff !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  padding: 1rem 1.5rem !important;
+  min-height: 60px !important;
+}
+
+.accessibility-mode .login-account-btn:hover {
+  background: #007bff !important;
+  color: #ffffff !important;
+  border: 3px solid #0056b3 !important;
+}
+
+/* Seção especial para idosos */
+.help-seniors {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  border: 3px solid #117a8b;
+}
+
+.help-seniors h3 {
+  color: white;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+  font-size: 1.6rem;
+  margin-bottom: 1.5rem;
+}
+
+.senior-tip {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border-left: 4px solid #ffffff;
+}
+
+.senior-tip h4 {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.senior-tip p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Estilos para modo acessível na seção de idosos */
+.accessibility-mode .help-seniors {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 4px solid #17a2b8 !important;
+}
+
+.accessibility-mode .help-seniors h3 {
+  color: #000000 !important;
+  border-bottom: 4px solid #17a2b8 !important;
+  font-size: 2rem !important;
+}
+
+.accessibility-mode .senior-tip {
+  background: rgba(23, 162, 184, 0.1) !important;
+  border-left: 6px solid #17a2b8 !important;
+  padding: 1.5rem !important;
+  margin: 2rem 0 !important;
+}
+
+.accessibility-mode .senior-tip h4 {
+  color: #000000 !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+}
+
+.accessibility-mode .senior-tip p {
+  color: #333333 !important;
+  font-size: 1.2rem !important;
+  line-height: 1.8 !important;
+}
