@@ -26,6 +26,125 @@ function Home({ onLogout }) {
   const [accessibilityMode, setAccessibilityMode] = useState(() => {
     return localStorage.getItem('accessibilityMode') === 'true'
   })
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('language') || 'pt-BR'
+  })
+
+  const translations = {
+    'pt-BR': {
+      greeting: 'Bom dia',
+      dashboard: 'Página Inicial',
+      agenda: 'Agenda',
+      add: 'Adicionar',
+      history: 'Histórico',
+      pharmacies: 'Farmácias',
+      settings: 'Configurações',
+      help: 'Ajuda',
+      about: 'Sobre Nós',
+      nextMeds: 'Próximos Medicamentos',
+      daySummary: 'Resumo do Dia',
+      lastMeds: 'Últimos Remédios',
+      reminders: 'Lembrete',
+      nearestPharmacy: 'Farmácia Mais Próxima',
+      medsTaken: 'Medicamentos tomados',
+      nextMed: 'Próximo medicamento',
+      weeklyAdherence: 'Adesão semanal',
+      addMed: 'Adicionar Medicamento',
+      addReminder: 'Adicionar Lembrete',
+      medName: 'Nome do medicamento',
+      dosage: 'Dosagem',
+      time: 'Horário',
+      frequency: 'Frequência',
+      daily: 'Diário',
+      languageLabel: 'Idioma do aplicativo:',
+      notifications: 'Notificações',
+      medReminders: 'Lembrete de medicamentos',
+      pushNotifications: 'Notificações push',
+      darkMode: 'Modo escuro',
+      accessibilityMode: 'Modo de Acessibilidade (Letras Grandes)',
+      profile: 'Perfil',
+      name: 'Nome:',
+      password: 'Senha:',
+      editProfile: 'Editar Perfil',
+      logout: 'Sair da Conta'
+    },
+    'en-US': {
+      greeting: 'Good morning',
+      dashboard: 'Dashboard',
+      agenda: 'Schedule',
+      add: 'Add',
+      history: 'History',
+      pharmacies: 'Pharmacies',
+      settings: 'Settings',
+      help: 'Help',
+      about: 'About Us',
+      nextMeds: 'Next Medications',
+      daySummary: 'Day Summary',
+      lastMeds: 'Last Medications',
+      reminders: 'Reminders',
+      nearestPharmacy: 'Nearest Pharmacy',
+      medsTaken: 'Medications taken',
+      nextMed: 'Next medication',
+      weeklyAdherence: 'Weekly adherence',
+      addMed: 'Add Medication',
+      addReminder: 'Add Reminder',
+      medName: 'Medication name',
+      dosage: 'Dosage',
+      time: 'Time',
+      frequency: 'Frequency',
+      daily: 'Daily',
+      languageLabel: 'App language:',
+      notifications: 'Notifications',
+      medReminders: 'Medication reminders',
+      pushNotifications: 'Push notifications',
+      darkMode: 'Dark mode',
+      accessibilityMode: 'Accessibility Mode (Large Letters)',
+      profile: 'Profile',
+      name: 'Name:',
+      password: 'Password:',
+      editProfile: 'Edit Profile',
+      logout: 'Logout'
+    },
+    'es-ES': {
+      greeting: 'Buenos días',
+      dashboard: 'Inicio',
+      agenda: 'Agenda',
+      add: 'Agregar',
+      history: 'Historial',
+      pharmacies: 'Farmacias',
+      settings: 'Configuración',
+      help: 'Ayuda',
+      about: 'Acerca de',
+      nextMeds: 'Próximos Medicamentos',
+      daySummary: 'Resumen del Día',
+      lastMeds: 'Últimos Medicamentos',
+      reminders: 'Recordatorios',
+      nearestPharmacy: 'Farmacia Más Cercana',
+      medsTaken: 'Medicamentos tomados',
+      nextMed: 'Próximo medicamento',
+      weeklyAdherence: 'Adherencia semanal',
+      addMed: 'Agregar Medicamento',
+      addReminder: 'Agregar Recordatorio',
+      medName: 'Nombre del medicamento',
+      dosage: 'Dosis',
+      time: 'Hora',
+      frequency: 'Frecuencia',
+      daily: 'Diario',
+      languageLabel: 'Idioma de la aplicación:',
+      notifications: 'Notificaciones',
+      medReminders: 'Recordatorios de medicamentos',
+      pushNotifications: 'Notificaciones push',
+      darkMode: 'Modo oscuro',
+      accessibilityMode: 'Modo de Accesibilidad (Letras Grandes)',
+      profile: 'Perfil',
+      name: 'Nombre:',
+      password: 'Contraseña:',
+      editProfile: 'Editar Perfil',
+      logout: 'Cerrar Sesión'
+    }
+  }
+
+  const t = translations[language]
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingMed, setEditingMed] = useState(null)
   const [editMedicamento, setEditMedicamento] = useState({
@@ -90,8 +209,8 @@ function Home({ onLogout }) {
   ]
 
   const agendaMedicamentos = [
-    { id: 1, nome: 'Vitamina D', dosagem: '1000mg', horario: '09:00', frequencia: 'Diário', status: 'pendente', observacao: 'Tomar com alimentos', tipo: 'Suplemento' },
-    { id: 2, nome: 'Omeprazol', dosagem: '20mg', horario: '07:00', frequencia: 'Diário', status: 'atrasado', observacao: 'Tomar em jejum', tipo: 'Medicamento' }
+    { id: 1, nome: 'Vitamina D', dosagem: '1000mg', horario: '09:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar com alimentos', tipo: 'Suplemento' },
+    { id: 2, nome: 'Omeprazol', dosagem: '20mg', horario: '07:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar em jejum', tipo: 'Medicamento' }
   ]
 
   const historicoRemedios = [
@@ -127,7 +246,7 @@ function Home({ onLogout }) {
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#2c3e50"/>
             </svg>
           </div>
-          <h2 className="greeting-text">{saudacao}</h2>
+          <h2 className="greeting-text">{t.greeting}{userName ? `, ${userName}` : ''}</h2>
         </div>
         <div className="dashboard">
           <div className="dashboard-main">
@@ -144,7 +263,7 @@ function Home({ onLogout }) {
                 <circle cx="65" cy="55" r="3" fill="white"/>
               </svg>
             </div>
-            <h3>💊 Próximos Medicamentos</h3>
+            <h3>💊 {t.nextMeds}</h3>
             {agendaMedicamentos.slice(0, 3).map((med, index) => {
               const badge = getStatusBadge(med.status)
               const jaTomado = medicamentosTomados.includes(med.id)
@@ -170,6 +289,30 @@ function Home({ onLogout }) {
                 </div>
               )
             })}
+            <div className="medication-item">
+              <div>
+                <div className="item-info">
+                  <span className="med-name">Dipirona</span>
+                  <span className="badge" style={{backgroundColor: '#f59e0b'}}>Próximo</span>
+                </div>
+                <div className="item-actions">
+                  <span className="time-display">15:00</span>
+                  <button className="btn-take" onClick={() => marcarComoTomado(3)}>✓ Tomado</button>
+                </div>
+              </div>
+            </div>
+            <div className="medication-item">
+              <div>
+                <div className="item-info">
+                  <span className="med-name">Losartana</span>
+                  <span className="badge" style={{backgroundColor: '#3b82f6'}}>Próximo</span>
+                </div>
+                <div className="item-actions">
+                  <span className="time-display">18:00</span>
+                  <button className="btn-take" onClick={() => marcarComoTomado(4)}>✓ Tomado</button>
+                </div>
+              </div>
+            </div>
           </div>
           
           <div className="card urgent-card">
@@ -181,17 +324,29 @@ function Home({ onLogout }) {
                 <circle cx="65" cy="45" r="4" fill="#48bb78"/>
               </svg>
             </div>
-            <h3>📊 Resumo do Dia</h3>
+            <h3>📊 {t.daySummary}</h3>
             <div className="item">
-              <span>Medicamentos tomados</span>
+              <span>{t.medsTaken}</span>
               <span>{medicamentosTomados.length + 2}/4</span>
             </div>
             <div className="item">
-              <span>Próximo medicamento</span>
+              <span>{t.nextMed}</span>
               <span>Vitamina D - 09:00</span>
             </div>
+            <div className="item">
+              <span>Consultas hoje</span>
+              <span>1 agendada</span>
+            </div>
+            <div className="item">
+              <span>Água consumida</span>
+              <span>1.2L / 2L</span>
+            </div>
+            <div className="item">
+              <span>Exercícios</span>
+              <span>Pendente</span>
+            </div>
             <div className="progress-container">
-              <span>Adesão semanal: {adesao}%</span>
+              <span>{t.weeklyAdherence}: {adesao}%</span>
               <div className="progress-bar">
                 <div className="progress-fill" style={{width: `${adesao}%`}}></div>
               </div>
@@ -206,7 +361,7 @@ function Home({ onLogout }) {
                 <circle cx="50" cy="50" r="8" fill="white"/>
               </svg>
             </div>
-            <h3>💊 Últimos Remédios</h3>
+            <h3>💊 {t.lastMeds}</h3>
             {ultimosRemedios.slice(0, 4).map((remedio, index) => {
               const badge = getStatusBadge(remedio.status)
               return (
@@ -230,7 +385,7 @@ function Home({ onLogout }) {
                 <path d="M35 35 L65 35 M35 45 L60 45 M35 55 L55 55" stroke="white" stroke-width="2"/>
               </svg>
             </div>
-            <h3>📝 Lembrete</h3>
+            <h3>📝 {t.reminders}</h3>
             <div className="item">
               <span>Consulta médica</span>
               <span>Amanhã - 14:00</span>
@@ -254,6 +409,8 @@ function Home({ onLogout }) {
 
           </div>
           
+
+          
           
           </div>
           
@@ -269,7 +426,7 @@ function Home({ onLogout }) {
                   <rect x="57" y="65" width="8" height="15" fill="#1e40af"/>
                 </svg>
               </div>
-              <h3>🏥 Farmácia Mais Próxima</h3>
+              <h3>🏥 {t.nearestPharmacy}</h3>
             </div>
             <div className="pharmacy-list">
               {farmacias.slice(0, 3).map((farmacia, index) => {
@@ -295,12 +452,13 @@ function Home({ onLogout }) {
     )
   }
 
-  const handleAddMedicamento = (e) => {
-    e.preventDefault()
+  const handleAddMedicamento = () => {
     if (novoMedicamento.nome && novoMedicamento.dosagem && novoMedicamento.horario) {
       console.log('Novo medicamento:', novoMedicamento)
       showToastMessage('✨ Medicamento adicionado com sucesso!')
       setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
+    } else {
+      showToastMessage('⚠️ Preencha todos os campos obrigatórios!')
     }
   }
 
@@ -378,6 +536,12 @@ function Home({ onLogout }) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
           />
+          <button 
+            className="btn-add-med"
+            onClick={() => setActiveSection('adicionar')}
+          >
+            ➕ Adicionar Medicamento
+          </button>
         </div>
         <div className="agenda">
           {medicamentosFiltrados.map((med, index) => {
@@ -440,18 +604,27 @@ function Home({ onLogout }) {
       <h2 className="section-title">Adicionar</h2>
       <div className="agenda">
         <div className="card">
-          <h3>Adicionar Medicamento</h3>
+          <div className="card-header">
+            <h3>💊 {t.addMed}</h3>
+            <button 
+              className="btn-add-highlight"
+              onClick={handleAddMedicamento}
+              type="button"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
           <form onSubmit={handleAddMedicamento} className="med-form">
             <input
               type="text"
-              placeholder="Nome do medicamento"
+              placeholder={t.medName}
               value={novoMedicamento.nome}
               onChange={(e) => setNovoMedicamento({...novoMedicamento, nome: e.target.value})}
               required
             />
             <input
               type="text"
-              placeholder="Dosagem (ex: 50mg)"
+              placeholder={t.dosage}
               value={novoMedicamento.dosagem}
               onChange={(e) => setNovoMedicamento({...novoMedicamento, dosagem: e.target.value})}
               required
@@ -490,12 +663,26 @@ function Home({ onLogout }) {
               <option value="1 ano">1 ano</option>
               <option value="Contínuo">Contínuo</option>
             </select>
-            <button type="submit" className="btn-add">Adicionar</button>
           </form>
+          <button 
+            onClick={handleAddMedicamento}
+            style={{display: 'block', width: '100%', minHeight: '50px', backgroundColor: '#48bb78', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', marginTop: '1rem'}}
+          >
+            Adicionar Medicamento
+          </button>
         </div>
 
         <div className="card">
-          <h3>Adicionar Lembrete</h3>
+          <div className="card-header">
+            <h3>📝 {t.addReminder}</h3>
+            <button 
+              className="btn-add-highlight"
+              onClick={handleAddLembrete}
+              type="button"
+            >
+              ➕ Adicionar
+            </button>
+          </div>
           <form onSubmit={handleAddLembrete} className="med-form">
             <input
               type="text"
@@ -522,7 +709,7 @@ function Home({ onLogout }) {
               onChange={(e) => setNovoLembrete({...novoLembrete, horario: e.target.value})}
               required
             />
-            <button type="submit" className="btn-add">Adicionar Lembrete</button>
+            <button type="submit" className="btn-add" style={{display: 'block', width: '100%', minHeight: '50px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', marginTop: '1rem'}}>Adicionar Lembrete</button>
           </form>
         </div>
 
@@ -633,14 +820,14 @@ function Home({ onLogout }) {
               <circle cx="50" cy="15" r="3" fill="#f59e0b"/>
             </svg>
           </div>
-          <h4>Notificações</h4>
+          <h4>{t.notifications}</h4>
           <label>
             <input type="checkbox" defaultChecked />
-            Lembrete de medicamentos
+            {t.medReminders}
           </label>
           <label>
             <input type="checkbox" defaultChecked />
-            Notificações push
+            {t.pushNotifications}
           </label>
           <label>
             <input 
@@ -648,7 +835,7 @@ function Home({ onLogout }) {
               checked={darkMode}
               onChange={(e) => setDarkMode(e.target.checked)}
             />
-            Modo escuro
+            {t.darkMode}
           </label>
           <label>
             <input 
@@ -656,8 +843,23 @@ function Home({ onLogout }) {
               checked={accessibilityMode}
               onChange={toggleAccessibilityMode}
             />
-            Modo de Acessibilidade (Letras Grandes)
+            {t.accessibilityMode}
           </label>
+          <div className="language-selector">
+            <label>{t.languageLabel}</label>
+            <select 
+              value={language} 
+              onChange={(e) => {
+                setLanguage(e.target.value)
+                localStorage.setItem('language', e.target.value)
+                showToastMessage(`Idioma alterado para ${e.target.options[e.target.selectedIndex].text}`)
+              }}
+            >
+              <option value="pt-BR">Português (Brasil)</option>
+              <option value="en-US">English (US)</option>
+              <option value="es-ES">Español</option>
+            </select>
+          </div>
         </div>
         <div className="card">
           <div className="card-image">
@@ -666,21 +868,21 @@ function Home({ onLogout }) {
               <path d="M25 75 C25 60 35 50 50 50 C65 50 75 60 75 75 L25 75 Z" fill="#9ca3af" opacity="0.6"/>
             </svg>
           </div>
-          <h4>Perfil</h4>
+          <h4>{t.profile}</h4>
           <div className="perfil-info">
             <div className="item">
-              <span>Nome:</span>
+              <span>{t.name}</span>
               <span>{perfil.nome}</span>
             </div>
             <div className="item">
-              <span>Senha:</span>
+              <span>{t.password}</span>
               <span>{perfil.senha}</span>
             </div>
 
           </div>
           <div style={{textAlign: 'center'}}>
-            <button className="btn-config" onClick={() => setShowProfileModal(true)}>Editar Perfil</button>
-            <button className="btn-config" onClick={onLogout}>Sair da Conta</button>
+            <button className="btn-config" onClick={() => setShowProfileModal(true)}>{t.editProfile}</button>
+            <button className="btn-config" onClick={onLogout}>{t.logout}</button>
           </div>
         </div>
       </div>
@@ -986,49 +1188,49 @@ function Home({ onLogout }) {
             className={activeSection === 'dashboard' ? 'active' : ''} 
             onClick={() => setActiveSection('dashboard')}
           >
-            Página Inicial
+            {t.dashboard}
           </button>
           <button 
             className={activeSection === 'agenda' ? 'active' : ''} 
             onClick={() => setActiveSection('agenda')}
           >
-            Agenda
+            {t.agenda}
           </button>
           <button 
             className={activeSection === 'adicionar' ? 'active' : ''} 
             onClick={() => setActiveSection('adicionar')}
           >
-            Adicionar
+            {t.add}
           </button>
           <button 
             className={activeSection === 'historico' ? 'active' : ''} 
             onClick={() => setActiveSection('historico')}
           >
-            Histórico
+            {t.history}
           </button>
           <button 
             className={activeSection === 'farmacias' ? 'active' : ''} 
             onClick={() => setActiveSection('farmacias')}
           >
-            Farmácias
+            {t.pharmacies}
           </button>
           <button 
             className={activeSection === 'configuracoes' ? 'active' : ''} 
             onClick={() => setActiveSection('configuracoes')}
           >
-            Configurações
+            {t.settings}
           </button>
           <button 
             className={activeSection === 'ajuda' ? 'active' : ''} 
             onClick={() => setActiveSection('ajuda')}
           >
-            Ajuda
+            {t.help}
           </button>
           <button 
             className={activeSection === 'sobre' ? 'active' : ''} 
             onClick={() => setActiveSection('sobre')}
           >
-            Sobre Nós
+            {t.about}
           </button>
         </nav>
       </aside>
