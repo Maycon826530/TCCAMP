@@ -107,148 +107,172 @@ function Home({ onLogout }) {
     const adesao = calcularAdesao()
     const agora = new Date()
     const hora = agora.getHours()
-    const userName = sessionStorage.getItem('userName') || ''
+    const userName = sessionStorage.getItem('userName') || 'Usuário'
     let saudacao = 'Bom dia'
     if (hora >= 12 && hora < 18) saudacao = 'Boa tarde'
     else if (hora >= 18) saudacao = 'Boa noite'
     
-    if (userName) {
-      saudacao += `, ${userName}`
-    }
-    
     return (
-      <>
-        <div className="user-greeting">
-
-          <h2 className="greeting-text">{saudacao}</h2>
+      <div className="dashboard-container">
+        {/* Header com saudação e estatísticas rápidas */}
+        <div className="dashboard-header">
+          <div className="welcome-section">
+            <h1 className="welcome-title">{saudacao}, {userName}!</h1>
+            <p className="welcome-subtitle">Gerencie seus medicamentos de forma inteligente</p>
+          </div>
+          <div className="quick-stats">
+            <div className="stat-card">
+              <div className="stat-icon">💊</div>
+              <div className="stat-info">
+                <span className="stat-number">{medicamentosTomados.length + 2}</span>
+                <span className="stat-label">Tomados hoje</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">⏰</div>
+              <div className="stat-info">
+                <span className="stat-number">2</span>
+                <span className="stat-label">Pendentes</span>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon">📈</div>
+              <div className="stat-info">
+                <span className="stat-number">{adesao}%</span>
+                <span className="stat-label">Adesão</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="dashboard">
-          <div className="dashboard-main">
-            <div className="card urgent-card">
 
-            <h3>💊 Próximos Medicamentos</h3>
-            {agendaMedicamentos.slice(0, 3).map((med, index) => {
-              const badge = getStatusBadge(med.status)
-              const jaTomado = medicamentosTomados.includes(med.id)
-              return (
-                <div key={index} className="medication-item">
-                  <div>
-                    <div className="item-info">
-                      <span className="med-name">{med.nome}</span>
-                      <span className="badge" style={{backgroundColor: badge.color}}>{badge.text}</span>
-                    </div>
-                    <div className="item-actions">
-                      <span className="time-display">{med.horario}</span>
-                      {!jaTomado && med.status !== 'tomado' && (
+        {/* Grid principal */}
+        <div className="dashboard-grid">
+          {/* Próximos medicamentos */}
+          <div className="dashboard-card priority-card">
+            <div className="card-header-modern">
+              <h3><span className="card-icon">🎯</span>Próximos Medicamentos</h3>
+              <span className="card-badge urgent">Urgente</span>
+            </div>
+            <div className="medication-timeline">
+              {agendaMedicamentos.slice(0, 3).map((med, index) => {
+                const jaTomado = medicamentosTomados.includes(med.id)
+                return (
+                  <div key={index} className="timeline-item">
+                    <div className="timeline-time">{med.horario}</div>
+                    <div className="timeline-content">
+                      <div className="med-info">
+                        <h4>{med.nome}</h4>
+                        <span className="med-dosage">{med.dosagem}</span>
+                      </div>
+                      {!jaTomado && (
                         <button 
-                          className="btn-take" 
+                          className="btn-check" 
                           onClick={() => marcarComoTomado(med.id)}
                         >
-                          ✓ Tomado
+                          ✓
                         </button>
                       )}
                     </div>
                   </div>
-                </div>
-              )
-            })}
-            <div className="medication-item">
-              <div>
-                <div className="item-info">
-                  <span className="med-name">Dipirona</span>
-                  <span className="badge" style={{backgroundColor: '#3b82f6'}}>Próximo</span>
-                </div>
-                <div className="item-actions">
-                  <span className="time-display">15:00</span>
-                  <button className="btn-take" onClick={() => marcarComoTomado(3)}>✓ Tomado</button>
-                </div>
-              </div>
-            </div>
-            <div className="medication-item">
-              <div>
-                <div className="item-info">
-                  <span className="med-name">Losartana</span>
-                  <span className="badge" style={{backgroundColor: '#3b82f6'}}>Próximo</span>
-                </div>
-                <div className="item-actions">
-                  <span className="time-display">18:00</span>
-                  <button className="btn-take" onClick={() => marcarComoTomado(4)}>✓ Tomado</button>
+                )
+              })}
+              <div className="timeline-item">
+                <div className="timeline-time">15:00</div>
+                <div className="timeline-content">
+                  <div className="med-info">
+                    <h4>Dipirona</h4>
+                    <span className="med-dosage">500mg</span>
+                  </div>
+                  <button className="btn-check" onClick={() => marcarComoTomado(3)}>✓</button>
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="card urgent-card">
 
-            <h3>📊 Resumo do Dia</h3>
-            <div className="item">
-              <span>Medicamentos tomados</span>
-              <span>{medicamentosTomados.length + 2}/4</span>
+          {/* Resumo de adesão */}
+          <div className="dashboard-card">
+            <div className="card-header-modern">
+              <h3><span className="card-icon">📊</span>Adesão ao Tratamento</h3>
             </div>
-            <div className="item">
-              <span>Próximo medicamento</span>
-              <span>Vitamina D - 09:00</span>
-            </div>
-
-            <div className="progress-container">
-              <span>Adesão semanal: {adesao}%</span>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{width: `${adesao}%`}}></div>
+            <div className="adherence-chart">
+              <div className="chart-circle">
+                <svg viewBox="0 0 100 100" className="circular-chart">
+                  <path
+                    className="circle-bg"
+                    d="M 50,50 m 0,-40 a 40,40 0 1 1 0,80 a 40,40 0 1 1 0,-80"
+                  />
+                  <path
+                    className="circle"
+                    strokeDasharray={`${adesao * 2.51}, 251`}
+                    d="M 50,50 m 0,-40 a 40,40 0 1 1 0,80 a 40,40 0 1 1 0,-80"
+                  />
+                  <text x="50" y="50" className="percentage">{adesao}%</text>
+                </svg>
+              </div>
+              <div className="adherence-info">
+                <div className="adherence-item">
+                  <span className="dot success"></span>
+                  <span>Tomados: {medicamentosTomados.length + 12}</span>
+                </div>
+                <div className="adherence-item">
+                  <span className="dot warning"></span>
+                  <span>Perdidos: 3</span>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="card">
 
-            <h3>💊 Últimos Remédios</h3>
-            {ultimosRemedios.slice(0, 4).map((remedio, index) => {
-              const badge = getStatusBadge(remedio.status)
-              return (
-                <div key={index} className="item">
-                  <span className="med-name">{remedio.nome}</span>
-                  <div className="item-right">
-                    <span className="badge" style={{backgroundColor: badge.color}}>{badge.text}</span>
-                    <span className="item-date">{remedio.data} - {remedio.horario}</span>
+          {/* Histórico recente */}
+          <div className="dashboard-card">
+            <div className="card-header-modern">
+              <h3><span className="card-icon">📋</span>Histórico Recente</h3>
+              <button className="btn-link" onClick={() => setActiveSection('historico')}>Ver tudo</button>
+            </div>
+            <div className="recent-history">
+              {ultimosRemedios.map((remedio, index) => (
+                <div key={index} className="history-item">
+                  <div className="history-icon">✅</div>
+                  <div className="history-info">
+                    <span className="history-med">{remedio.nome}</span>
+                    <span className="history-time">{remedio.data} às {remedio.horario}</span>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-          
-          
-          <div className="card">
-
-            <h3>📝 Lembretes</h3>
-            <div className="item">
-              <span>Consulta médica</span>
-              <span>Amanhã - 14:00</span>
+              ))}
             </div>
-            <div className="item">
-              <span>Renovar receita</span>
-              <span>25/12 - 09:00</span>
-            </div>
-            <div className="item">
-              <span>Exame de sangue</span>
-              <span>30/12 - 08:00</span>
-            </div>
-            <div className="item">
-              <span>Comprar medicamentos</span>
-              <span>Hoje - 16:00</span>
-            </div>
-            <div className="item">
-              <span>Exercícios físicos</span>
-              <span>Amanhã - 07:00</span>
-            </div>
-
-          </div>
-          
-
-          
-          
           </div>
 
+          {/* Lembretes importantes */}
+          <div className="dashboard-card">
+            <div className="card-header-modern">
+              <h3><span className="card-icon">🔔</span>Lembretes</h3>
+              <button className="btn-link" onClick={() => setActiveSection('adicionar')}>Adicionar</button>
+            </div>
+            <div className="reminders-list">
+              <div className="reminder-item priority">
+                <div className="reminder-icon">🏥</div>
+                <div className="reminder-content">
+                  <span className="reminder-title">Consulta médica</span>
+                  <span className="reminder-time">Amanhã às 14:00</span>
+                </div>
+              </div>
+              <div className="reminder-item">
+                <div className="reminder-icon">📄</div>
+                <div className="reminder-content">
+                  <span className="reminder-title">Renovar receita</span>
+                  <span className="reminder-time">25/12 às 09:00</span>
+                </div>
+              </div>
+              <div className="reminder-item">
+                <div className="reminder-icon">🩸</div>
+                <div className="reminder-content">
+                  <span className="reminder-title">Exame de sangue</span>
+                  <span className="reminder-time">30/12 às 08:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </>
+      </div>
     )
   }
 
@@ -900,13 +924,16 @@ function Home({ onLogout }) {
     <div className={`home-container ${darkMode ? 'dark-mode' : ''} ${accessibilityMode ? 'accessibility-mode' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar-header">
-          <h1>PharmaLife</h1>
+          <div className="logo-section">
+            <div className="logo-icon">💊</div>
+            <h1>MedTracker</h1>
+          </div>
           <button 
             className="accessibility-toggle"
             onClick={toggleAccessibilityMode}
             title={accessibilityMode ? 'Desativar modo de acessibilidade' : 'Ativar modo de acessibilidade - Letras maiores'}
           >
-            {accessibilityMode ? '🔍 Modo Normal' : '🔍 Letras Grandes'}
+            {accessibilityMode ? '🔍 Normal' : '🔍 Grande'}
           </button>
         </div>
         <nav className="nav-buttons">
