@@ -26,125 +26,7 @@ function Home({ onLogout }) {
   const [accessibilityMode, setAccessibilityMode] = useState(() => {
     return localStorage.getItem('accessibilityMode') === 'true'
   })
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('language') || 'pt-BR'
-  })
 
-  const translations = {
-    'pt-BR': {
-      greeting: 'Bom dia',
-      dashboard: 'Página Inicial',
-      agenda: 'Agenda',
-      add: 'Adicionar',
-      history: 'Histórico',
-      pharmacies: 'Farmácias',
-      settings: 'Configurações',
-      help: 'Ajuda',
-      about: 'Sobre Nós',
-      nextMeds: 'Próximos Medicamentos',
-      daySummary: 'Resumo do Dia',
-      lastMeds: 'Últimos Remédios',
-      reminders: 'Lembrete',
-      nearestPharmacy: 'Farmácia Mais Próxima',
-      medsTaken: 'Medicamentos tomados',
-      nextMed: 'Próximo medicamento',
-      weeklyAdherence: 'Adesão semanal',
-      addMed: 'Adicionar Medicamento',
-      addReminder: 'Adicionar Lembrete',
-      medName: 'Nome do medicamento',
-      dosage: 'Dosagem',
-      time: 'Horário',
-      frequency: 'Frequência',
-      daily: 'Diário',
-      languageLabel: 'Idioma do aplicativo:',
-      notifications: 'Notificações',
-      medReminders: 'Lembrete de medicamentos',
-      pushNotifications: 'Notificações push',
-      darkMode: 'Modo escuro',
-      accessibilityMode: 'Modo de Acessibilidade (Letras Grandes)',
-      profile: 'Perfil',
-      name: 'Nome:',
-      password: 'Senha:',
-      editProfile: 'Editar Perfil',
-      logout: 'Sair da Conta'
-    },
-    'en-US': {
-      greeting: 'Good morning',
-      dashboard: 'Dashboard',
-      agenda: 'Schedule',
-      add: 'Add',
-      history: 'History',
-      pharmacies: 'Pharmacies',
-      settings: 'Settings',
-      help: 'Help',
-      about: 'About Us',
-      nextMeds: 'Next Medications',
-      daySummary: 'Day Summary',
-      lastMeds: 'Last Medications',
-      reminders: 'Reminders',
-      nearestPharmacy: 'Nearest Pharmacy',
-      medsTaken: 'Medications taken',
-      nextMed: 'Next medication',
-      weeklyAdherence: 'Weekly adherence',
-      addMed: 'Add Medication',
-      addReminder: 'Add Reminder',
-      medName: 'Medication name',
-      dosage: 'Dosage',
-      time: 'Time',
-      frequency: 'Frequency',
-      daily: 'Daily',
-      languageLabel: 'App language:',
-      notifications: 'Notifications',
-      medReminders: 'Medication reminders',
-      pushNotifications: 'Push notifications',
-      darkMode: 'Dark mode',
-      accessibilityMode: 'Accessibility Mode (Large Letters)',
-      profile: 'Profile',
-      name: 'Name:',
-      password: 'Password:',
-      editProfile: 'Edit Profile',
-      logout: 'Logout'
-    },
-    'es-ES': {
-      greeting: 'Buenos días',
-      dashboard: 'Inicio',
-      agenda: 'Agenda',
-      add: 'Agregar',
-      history: 'Historial',
-      pharmacies: 'Farmacias',
-      settings: 'Configuración',
-      help: 'Ayuda',
-      about: 'Acerca de',
-      nextMeds: 'Próximos Medicamentos',
-      daySummary: 'Resumen del Día',
-      lastMeds: 'Últimos Medicamentos',
-      reminders: 'Recordatorios',
-      nearestPharmacy: 'Farmacia Más Cercana',
-      medsTaken: 'Medicamentos tomados',
-      nextMed: 'Próximo medicamento',
-      weeklyAdherence: 'Adherencia semanal',
-      addMed: 'Agregar Medicamento',
-      addReminder: 'Agregar Recordatorio',
-      medName: 'Nombre del medicamento',
-      dosage: 'Dosis',
-      time: 'Hora',
-      frequency: 'Frecuencia',
-      daily: 'Diario',
-      languageLabel: 'Idioma de la aplicación:',
-      notifications: 'Notificaciones',
-      medReminders: 'Recordatorios de medicamentos',
-      pushNotifications: 'Notificaciones push',
-      darkMode: 'Modo oscuro',
-      accessibilityMode: 'Modo de Accesibilidad (Letras Grandes)',
-      profile: 'Perfil',
-      name: 'Nombre:',
-      password: 'Contraseña:',
-      editProfile: 'Editar Perfil',
-      logout: 'Cerrar Sesión'
-    }
-  }
-
-  const t = translations[language]
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingMed, setEditingMed] = useState(null)
   const [editMedicamento, setEditMedicamento] = useState({
@@ -219,11 +101,7 @@ function Home({ onLogout }) {
     { nome: 'Renovar receita', data: '25/12/2024', horario: '09:00' }
   ]
 
-  const farmacias = [
-    { nome: 'Farmácia Popular', endereco: 'Rua A, 123', distancia: '0.5km', status: 'aberta' },
-    { nome: 'Drogasil', endereco: 'Av. B, 456', distancia: '1.2km', status: 'fechada' },
-    { nome: 'Farmácia 24h', endereco: 'Rua C, 789', distancia: '2.1km', status: 'aberta' }
-  ]
+
 
   const renderDashboard = () => {
     const adesao = calcularAdesao()
@@ -241,29 +119,14 @@ function Home({ onLogout }) {
     return (
       <>
         <div className="user-greeting">
-          <div className="user-avatar">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#2c3e50"/>
-            </svg>
-          </div>
-          <h2 className="greeting-text">{t.greeting}{userName ? `, ${userName}` : ''}</h2>
+
+          <h2 className="greeting-text">{saudacao}</h2>
         </div>
         <div className="dashboard">
           <div className="dashboard-main">
             <div className="card urgent-card">
-            <div className="card-image">
-              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <rect x="20" y="30" width="60" height="40" rx="5" fill="#3b82f6" opacity="0.8"/>
-                <rect x="25" y="35" width="50" height="30" rx="3" fill="#60a5fa" opacity="0.6"/>
-                <circle cx="35" cy="45" r="3" fill="white"/>
-                <circle cx="50" cy="45" r="3" fill="white"/>
-                <circle cx="65" cy="45" r="3" fill="white"/>
-                <circle cx="35" cy="55" r="3" fill="white"/>
-                <circle cx="50" cy="55" r="3" fill="white"/>
-                <circle cx="65" cy="55" r="3" fill="white"/>
-              </svg>
-            </div>
-            <h3>💊 {t.nextMeds}</h3>
+
+            <h3>💊 Próximos Medicamentos</h3>
             {agendaMedicamentos.slice(0, 3).map((med, index) => {
               const badge = getStatusBadge(med.status)
               const jaTomado = medicamentosTomados.includes(med.id)
@@ -293,7 +156,7 @@ function Home({ onLogout }) {
               <div>
                 <div className="item-info">
                   <span className="med-name">Dipirona</span>
-                  <span className="badge" style={{backgroundColor: '#f59e0b'}}>Próximo</span>
+                  <span className="badge" style={{backgroundColor: '#3b82f6'}}>Próximo</span>
                 </div>
                 <div className="item-actions">
                   <span className="time-display">15:00</span>
@@ -316,37 +179,19 @@ function Home({ onLogout }) {
           </div>
           
           <div className="card urgent-card">
-            <div className="card-image">
-              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <path d="M20 80 L35 60 L50 70 L65 45 L80 50" stroke="#48bb78" stroke-width="3" fill="none" stroke-linecap="round"/>
-                <circle cx="35" cy="60" r="4" fill="#3b82f6"/>
-                <circle cx="50" cy="70" r="4" fill="#60a5fa"/>
-                <circle cx="65" cy="45" r="4" fill="#48bb78"/>
-              </svg>
-            </div>
-            <h3>📊 {t.daySummary}</h3>
+
+            <h3>📊 Resumo do Dia</h3>
             <div className="item">
-              <span>{t.medsTaken}</span>
+              <span>Medicamentos tomados</span>
               <span>{medicamentosTomados.length + 2}/4</span>
             </div>
             <div className="item">
-              <span>{t.nextMed}</span>
+              <span>Próximo medicamento</span>
               <span>Vitamina D - 09:00</span>
             </div>
-            <div className="item">
-              <span>Consultas hoje</span>
-              <span>1 agendada</span>
-            </div>
-            <div className="item">
-              <span>Água consumida</span>
-              <span>1.2L / 2L</span>
-            </div>
-            <div className="item">
-              <span>Exercícios</span>
-              <span>Pendente</span>
-            </div>
+
             <div className="progress-container">
-              <span>{t.weeklyAdherence}: {adesao}%</span>
+              <span>Adesão semanal: {adesao}%</span>
               <div className="progress-bar">
                 <div className="progress-fill" style={{width: `${adesao}%`}}></div>
               </div>
@@ -354,14 +199,8 @@ function Home({ onLogout }) {
           </div>
           
           <div className="card">
-            <div className="card-image">
-              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <rect x="20" y="35" width="60" height="30" rx="15" fill="#3b82f6" opacity="0.8"/>
-                <rect x="30" y="25" width="40" height="50" rx="20" fill="#60a5fa" opacity="0.6"/>
-                <circle cx="50" cy="50" r="8" fill="white"/>
-              </svg>
-            </div>
-            <h3>💊 {t.lastMeds}</h3>
+
+            <h3>💊 Últimos Remédios</h3>
             {ultimosRemedios.slice(0, 4).map((remedio, index) => {
               const badge = getStatusBadge(remedio.status)
               return (
@@ -378,14 +217,8 @@ function Home({ onLogout }) {
           
           
           <div className="card">
-            <div className="card-image">
-              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <rect x="25" y="20" width="50" height="60" rx="5" fill="#f59e0b" opacity="0.8"/>
-                <rect x="30" y="25" width="40" height="50" rx="3" fill="#fbbf24" opacity="0.6"/>
-                <path d="M35 35 L65 35 M35 45 L60 45 M35 55 L55 55" stroke="white" stroke-width="2"/>
-              </svg>
-            </div>
-            <h3>📝 {t.reminders}</h3>
+
+            <h3>📝 Lembretes</h3>
             <div className="item">
               <span>Consulta médica</span>
               <span>Amanhã - 14:00</span>
@@ -413,40 +246,7 @@ function Home({ onLogout }) {
           
           
           </div>
-          
-          <div className="dashboard-footer">
-            <div className="card pharmacy-horizontal">
-              <div className="pharmacy-header">
-              <div className="card-image">
-                <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
-                  <rect x="25" y="40" width="50" height="40" rx="5" fill="#3b82f6" opacity="0.8"/>
-                  <rect x="30" y="35" width="40" height="30" rx="3" fill="#60a5fa" opacity="0.6"/>
-                  <path d="M45 50 L55 50 M50 45 L50 55" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                  <rect x="35" y="65" width="8" height="15" fill="#1e40af"/>
-                  <rect x="57" y="65" width="8" height="15" fill="#1e40af"/>
-                </svg>
-              </div>
-              <h3>🏥 {t.nearestPharmacy}</h3>
-            </div>
-            <div className="pharmacy-list">
-              {farmacias.slice(0, 3).map((farmacia, index) => {
-                const badge = getStatusBadge(farmacia.status)
-                return (
-                  <div key={index} className="pharmacy-item">
-                    <div className="pharmacy-info">
-                      <span className="pharmacy-name">{farmacia.nome}</span>
-                      <span className="pharmacy-address">{farmacia.endereco}</span>
-                    </div>
-                    <div className="pharmacy-details">
-                      <span className="badge" style={{backgroundColor: badge.color}}>{badge.text}</span>
-                      <span className="pharmacy-distance">{farmacia.distancia}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            </div>
-          </div>
+
         </div>
       </>
     )
@@ -518,7 +318,7 @@ function Home({ onLogout }) {
     }
   }
 
-  const [agendaView, setAgendaView] = useState('overview') // 'overview', 'medicamentos', 'lembretes'
+
 
   const renderAgenda = () => {
     const medicamentosFiltrados = agendaMedicamentos.filter(med => 
@@ -605,7 +405,7 @@ function Home({ onLogout }) {
       <div className="agenda">
         <div className="card">
           <div className="card-header">
-            <h3>💊 {t.addMed}</h3>
+            <h3>💊 Adicionar Medicamento</h3>
             <button 
               className="btn-add-highlight"
               onClick={handleAddMedicamento}
@@ -617,14 +417,14 @@ function Home({ onLogout }) {
           <form onSubmit={handleAddMedicamento} className="med-form">
             <input
               type="text"
-              placeholder={t.medName}
+              placeholder="Nome do medicamento"
               value={novoMedicamento.nome}
               onChange={(e) => setNovoMedicamento({...novoMedicamento, nome: e.target.value})}
               required
             />
             <input
               type="text"
-              placeholder={t.dosage}
+              placeholder="Dosagem (ex: 50mg)"
               value={novoMedicamento.dosagem}
               onChange={(e) => setNovoMedicamento({...novoMedicamento, dosagem: e.target.value})}
               required
@@ -674,7 +474,7 @@ function Home({ onLogout }) {
 
         <div className="card">
           <div className="card-header">
-            <h3>📝 {t.addReminder}</h3>
+            <h3>📝 Adicionar Lembrete</h3>
             <button 
               className="btn-add-highlight"
               onClick={handleAddLembrete}
@@ -744,13 +544,7 @@ function Home({ onLogout }) {
       <div className="historico">
         {historicoRemedios.map((remedio, index) => (
           <div key={index} className="card">
-            <div className="card-image">
-              <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-                <rect x="25" y="20" width="50" height="60" rx="5" fill="#ed8936" opacity="0.8"/>
-                <rect x="30" y="25" width="40" height="50" rx="3" fill="#f6ad55" opacity="0.6"/>
-                <path d="M35 35 L65 35 M35 45 L60 45 M35 55 L55 55" stroke="white" stroke-width="2"/>
-              </svg>
-            </div>
+
             <h4>{remedio.nome}</h4>
             <div className="item">
               <span>Data:</span>
@@ -766,41 +560,7 @@ function Home({ onLogout }) {
     </>
   )
 
-  const renderFarmacias = () => (
-    <>
-      <h2 className="section-title">Farmácias Próximas</h2>
-      <div className="farmacias">
-        {farmacias.map((farmacia, index) => {
-          const badge = getStatusBadge(farmacia.status)
-          return (
-            <div key={index} className="card pharmacy-card">
-              <div className="card-image">
-                <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-                  <rect x="20" y="35" width="60" height="45" rx="5" fill="#3b82f6" opacity="0.8"/>
-                  <rect x="25" y="30" width="50" height="35" rx="3" fill="#60a5fa" opacity="0.6"/>
-                  <path d="M45 40 L55 40 M50 35 L50 45" stroke="white" stroke-width="3" stroke-linecap="round"/>
-                  <rect x="30" y="65" width="10" height="15" fill="#1e40af"/>
-                  <rect x="60" y="65" width="10" height="15" fill="#1e40af"/>
-                </svg>
-              </div>
-              <div className="card-header">
-                <h4>{farmacia.nome}</h4>
-                <span className="badge" style={{backgroundColor: badge.color}}>{badge.text}</span>
-              </div>
-              <div className="item">
-                <span>Endereço:</span>
-                <span>{farmacia.endereco}</span>
-              </div>
-              <div className="item">
-                <span>Distância:</span>
-                <span>{farmacia.distancia}</span>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </>
-  )
+
 
   const handleSavePerfil = (e) => {
     e.preventDefault()
@@ -813,21 +573,15 @@ function Home({ onLogout }) {
       <h2 className="section-title">Configurações</h2>
       <div className="configuracoes">
         <div className="card">
-          <div className="card-image">
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-              <path d="M50 20 C40 20 35 30 35 40 C35 50 30 55 30 65 L70 65 C70 55 65 50 65 40 C65 30 60 20 50 20 Z" fill="#6b7280" opacity="0.8"/>
-              <rect x="45" y="65" width="10" height="8" rx="2" fill="#9ca3af" opacity="0.6"/>
-              <circle cx="50" cy="15" r="3" fill="#f59e0b"/>
-            </svg>
-          </div>
-          <h4>{t.notifications}</h4>
+
+          <h4>Notificações</h4>
           <label>
             <input type="checkbox" defaultChecked />
-            {t.medReminders}
+            Lembrete de medicamentos
           </label>
           <label>
             <input type="checkbox" defaultChecked />
-            {t.pushNotifications}
+            Notificações push
           </label>
           <label>
             <input 
@@ -835,7 +589,7 @@ function Home({ onLogout }) {
               checked={darkMode}
               onChange={(e) => setDarkMode(e.target.checked)}
             />
-            {t.darkMode}
+            Modo escuro
           </label>
           <label>
             <input 
@@ -843,46 +597,27 @@ function Home({ onLogout }) {
               checked={accessibilityMode}
               onChange={toggleAccessibilityMode}
             />
-            {t.accessibilityMode}
+            Modo de Acessibilidade (Letras Grandes)
           </label>
-          <div className="language-selector">
-            <label>{t.languageLabel}</label>
-            <select 
-              value={language} 
-              onChange={(e) => {
-                setLanguage(e.target.value)
-                localStorage.setItem('language', e.target.value)
-                showToastMessage(`Idioma alterado para ${e.target.options[e.target.selectedIndex].text}`)
-              }}
-            >
-              <option value="pt-BR">Português (Brasil)</option>
-              <option value="en-US">English (US)</option>
-              <option value="es-ES">Español</option>
-            </select>
-          </div>
+
         </div>
         <div className="card">
-          <div className="card-image">
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="35" r="15" fill="#6b7280" opacity="0.8"/>
-              <path d="M25 75 C25 60 35 50 50 50 C65 50 75 60 75 75 L25 75 Z" fill="#9ca3af" opacity="0.6"/>
-            </svg>
-          </div>
-          <h4>{t.profile}</h4>
+
+          <h4>Perfil</h4>
           <div className="perfil-info">
             <div className="item">
-              <span>{t.name}</span>
+              <span>Nome:</span>
               <span>{perfil.nome}</span>
             </div>
             <div className="item">
-              <span>{t.password}</span>
+              <span>Senha:</span>
               <span>{perfil.senha}</span>
             </div>
 
           </div>
           <div style={{textAlign: 'center'}}>
-            <button className="btn-config" onClick={() => setShowProfileModal(true)}>{t.editProfile}</button>
-            <button className="btn-config" onClick={onLogout}>{t.logout}</button>
+            <button className="btn-config" onClick={() => setShowProfileModal(true)}>Editar Perfil</button>
+            <button className="btn-config" onClick={onLogout}>Sair da Conta</button>
           </div>
         </div>
       </div>
@@ -980,7 +715,7 @@ function Home({ onLogout }) {
       'dashboard': 'PharmaLife - Home',
       'agenda': 'PharmaLife - Agenda',
       'historico': 'PharmaLife - Histórico',
-      'farmacias': 'PharmaLife - Farmácias',
+
       'configuracoes': 'PharmaLife - Configurações',
       'ajuda': 'PharmaLife - Ajuda'
     }
@@ -1011,10 +746,7 @@ function Home({ onLogout }) {
             <span>Histórico:</span>
             <span>Veja remédios anteriores</span>
           </div>
-          <div className="item">
-            <span>Farmácias:</span>
-            <span>Encontre farmácias próximas</span>
-          </div>
+
         </div>
 
         <div className="card">
@@ -1073,13 +805,7 @@ function Home({ onLogout }) {
           </p>
         </div>
 
-        <div className="card">
-          <h3>🏪 Farmácias - Encontrar Farmácias Próximas</h3>
-          <p className="help-text">
-            Veja as farmácias mais próximas de você, com endereço e distância. 
-            Também mostra se estão abertas ou fechadas no momento.
-          </p>
-        </div>
+
 
         <div className="card help-tips">
           <h3>💡 Dicas Importantes para Usar Melhor</h3>
@@ -1161,7 +887,7 @@ function Home({ onLogout }) {
     switch(activeSection) {
       case 'agenda': return renderAgenda()
       case 'historico': return renderHistorico()
-      case 'farmacias': return renderFarmacias()
+
       case 'configuracoes': return renderConfiguracoes()
       case 'ajuda': return renderAjuda()
       case 'adicionar': return renderAdicionar()
@@ -1188,49 +914,44 @@ function Home({ onLogout }) {
             className={activeSection === 'dashboard' ? 'active' : ''} 
             onClick={() => setActiveSection('dashboard')}
           >
-            {t.dashboard}
+            Página Inicial
           </button>
           <button 
             className={activeSection === 'agenda' ? 'active' : ''} 
             onClick={() => setActiveSection('agenda')}
           >
-            {t.agenda}
+            Agenda
           </button>
           <button 
             className={activeSection === 'adicionar' ? 'active' : ''} 
             onClick={() => setActiveSection('adicionar')}
           >
-            {t.add}
+            Adicionar
           </button>
           <button 
             className={activeSection === 'historico' ? 'active' : ''} 
             onClick={() => setActiveSection('historico')}
           >
-            {t.history}
+            Histórico
           </button>
-          <button 
-            className={activeSection === 'farmacias' ? 'active' : ''} 
-            onClick={() => setActiveSection('farmacias')}
-          >
-            {t.pharmacies}
-          </button>
+
           <button 
             className={activeSection === 'configuracoes' ? 'active' : ''} 
             onClick={() => setActiveSection('configuracoes')}
           >
-            {t.settings}
+            Configurações
           </button>
           <button 
             className={activeSection === 'ajuda' ? 'active' : ''} 
             onClick={() => setActiveSection('ajuda')}
           >
-            {t.help}
+            Ajuda
           </button>
           <button 
             className={activeSection === 'sobre' ? 'active' : ''} 
             onClick={() => setActiveSection('sobre')}
           >
-            {t.about}
+            Sobre Nós
           </button>
         </nav>
       </aside>

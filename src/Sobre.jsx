@@ -2,11 +2,11 @@ import './Sobre.css'
 
 function Sobre() {
   const integrantes = [
-    { nome: 'Maycon', papel: 'Desenvolvedor' },
-    { nome: 'Adriel', papel: 'Desenvolvedor' },
-    { nome: 'Felipe', papel: 'Desenvolvedor' },
-    { nome: 'Caio', papel: 'Desenvolvedor' },
-    { nome: 'Murilo', papel: 'Desenvolvedor' }
+    { nome: 'Maycon', papel: 'Programador' },
+    { nome: 'Adriel', papel: 'Designer' },
+    { nome: 'Felipe', papel: 'Designer' },
+    { nome: 'Caio', papel: 'Designer' },
+    { nome: 'Murilo', papel: 'Gerente' }
   ]
 
   return (
@@ -60,8 +60,8 @@ function Sobre() {
           <div className="tech-list">
             <span className="tech-item">React</span>
             <span className="tech-item">JavaScript</span>
-            <span className="tech-item">CSS3</span>
-            <span className="tech-item">HTML5</span>
+            <span className="tech-item">CSS</span>
+            <span className="tech-item">HTML</span>
             <span className="tech-item">Vite</span>
           </div>
         </div>
