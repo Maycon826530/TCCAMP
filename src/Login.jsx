@@ -6,6 +6,7 @@ function Login({ onGoToCadastro, onLogin }) {
     usuario: '',
     senha: ''
   })
+  const [isAdminLogin, setIsAdminLogin] = useState(false)
 
   const handleChange = (e) => {
     setFormData({
@@ -20,10 +21,61 @@ function Login({ onGoToCadastro, onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Login:', formData)
-    alert('Login realizado com sucesso!')
-    sessionStorage.setItem('userName', formData.usuario)
-    onLogin()
+    
+    // Contas de administrador pré-definidas
+    const admins = {
+      'mayconmoreira': 'rm94602',
+      'felipeprestes': 'rm94325', 
+      'adrielfelipe': 'rm94608',
+      'murilokffiner': 'rm94705'
+    }
+    
+    // Verificar se é login de admin
+    if (isAdminLogin) {
+      if (admins[formData.usuario] && admins[formData.usuario] === formData.senha) {
+        alert('Login de administrador realizado com sucesso!')
+        sessionStorage.setItem('isAdmin', 'true')
+        sessionStorage.setItem('userName', formData.usuario)
+        onLogin()
+        return
+      } else {
+        alert('Credenciais de administrador inválidas!')
+        return
+      }
+    }
+    
+    // Verificar login de usuário comum
+    const usuarios = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+    const usuarioEncontrado = usuarios.find(u => 
+      (u.nome === formData.usuario || u.email === formData.usuario) && u.senha === formData.senha
+    )
+    
+    if (usuarioEncontrado) {
+      // Registrar login no localStorage
+      const loginData = {
+        usuario: formData.usuario,
+        dataLogin: new Date().toISOString(),
+        isAdmin: false
+      }
+      
+      const loginsExistentes = JSON.parse(localStorage.getItem('loginsRealizados') || '[]')
+      loginsExistentes.push(loginData)
+      localStorage.setItem('loginsRealizados', JSON.stringify(loginsExistentes))
+      
+      // Atualizar último login do usuário
+      const usuarioIndex = usuarios.findIndex(u => u.nome === usuarioEncontrado.nome)
+      if (usuarioIndex !== -1) {
+        usuarios[usuarioIndex].ultimoLogin = new Date().toISOString()
+        localStorage.setItem('usuariosCadastrados', JSON.stringify(usuarios))
+      }
+      
+      alert('Login realizado com sucesso! Bem-vindo de volta ao PharmaLife!')
+      sessionStorage.setItem('isAdmin', 'false')
+      sessionStorage.setItem('userName', formData.usuario)
+      onLogin()
+    } else {
+      alert('Usuário ou senha incorretos!')
+    }
   }
 
   return (
@@ -79,8 +131,19 @@ function Login({ onGoToCadastro, onLogin }) {
             />
           </div>
           
+          <div className="admin-checkbox">
+            <label>
+              <input
+                type="checkbox"
+                checked={isAdminLogin}
+                onChange={(e) => setIsAdminLogin(e.target.checked)}
+              />
+              <span>Entrar como administrador</span>
+            </label>
+          </div>
+          
           <button type="submit" className="login-btn">
-            Login
+            {isAdminLogin ? 'Login Admin' : 'Login'}
           </button>
         </form>
         

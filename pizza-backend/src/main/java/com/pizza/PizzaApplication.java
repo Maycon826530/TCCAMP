@@ -1,11 +1,11 @@
-package com.pizza;
+package com.pharmalife;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PizzaApplication {
+public class PharmaLifeApplication {
     public static void main(String[] args) {
-        SpringApplication.run(PizzaApplication.class, args);
+        SpringApplication.run(PharmaLifeApplication.class, args);
     }
 }

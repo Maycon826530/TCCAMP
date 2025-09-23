@@ -1,6 +1,7 @@
-package com.pizza;
+package com.pharmalife;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuario")
@@ -19,7 +20,13 @@ public class Usuario {
     private String senha;
     
     @Column(nullable = false)
-    private Integer nivelAcesso = 0;
+    private Boolean isAdmin = false;
+    
+    @Column(nullable = false)
+    private LocalDateTime dataCadastro = LocalDateTime.now();
+    
+    @Column
+    private LocalDateTime ultimoLogin;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -33,6 +40,12 @@ public class Usuario {
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
     
-    public Integer getNivelAcesso() { return nivelAcesso; }
-    public void setNivelAcesso(Integer nivelAcesso) { this.nivelAcesso = nivelAcesso; }
+    public Boolean getIsAdmin() { return isAdmin; }
+    public void setIsAdmin(Boolean isAdmin) { this.isAdmin = isAdmin; }
+    
+    public LocalDateTime getDataCadastro() { return dataCadastro; }
+    public void setDataCadastro(LocalDateTime dataCadastro) { this.dataCadastro = dataCadastro; }
+    
+    public LocalDateTime getUltimoLogin() { return ultimoLogin; }
+    public void setUltimoLogin(LocalDateTime ultimoLogin) { this.ultimoLogin = ultimoLogin; }
 }

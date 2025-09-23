@@ -340,3 +340,28 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
+/* Estilos para checkbox de administrador */
+.admin-checkbox {
+  margin: 1rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.admin-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+}
+
+.admin-checkbox span {
+  user-select: none;
+}

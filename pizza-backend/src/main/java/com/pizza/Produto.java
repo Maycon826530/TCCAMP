@@ -1,10 +1,11 @@
-package com.pizza;
+package com.pharmalife;
 
 import jakarta.persistence.*;
+import java.time.LocalTime;
 
 @Entity
-@Table(name = "produto")
-public class Produto {
+@Table(name = "medicamento")
+public class Medicamento {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -12,14 +13,17 @@ public class Produto {
     @Column(nullable = false, length = 200)
     private String nome;
     
+    @Column(nullable = false, length = 100)
+    private String dosagem;
+    
     @Column(nullable = false)
-    private Double preco;
+    private LocalTime horario;
+    
+    @Column(nullable = false, length = 50)
+    private String frequencia;
     
     @Column(length = 500)
-    private String descricao;
-    
-    @Column(nullable = false, length = 100)
-    private String categoria;
+    private String observacao;
     
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
@@ -31,14 +35,17 @@ public class Produto {
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     
-    public Double getPreco() { return preco; }
-    public void setPreco(Double preco) { this.preco = preco; }
+    public String getDosagem() { return dosagem; }
+    public void setDosagem(String dosagem) { this.dosagem = dosagem; }
     
-    public String getDescricao() { return descricao; }
-    public void setDescricao(String descricao) { this.descricao = descricao; }
+    public LocalTime getHorario() { return horario; }
+    public void setHorario(LocalTime horario) { this.horario = horario; }
     
-    public String getCategoria() { return categoria; }
-    public void setCategoria(String categoria) { this.categoria = categoria; }
+    public String getFrequencia() { return frequencia; }
+    public void setFrequencia(String frequencia) { this.frequencia = frequencia; }
+    
+    public String getObservacao() { return observacao; }
+    public void setObservacao(String observacao) { this.observacao = observacao; }
     
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }

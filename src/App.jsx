@@ -34,8 +34,37 @@ function Cadastro({ onGoToLogin, onLogin }) {
       return
     }
     
+    // Verificar se usuário já existe
+    const usuariosExistentes = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+    const nomeExiste = usuariosExistentes.find(u => u.nome.toLowerCase() === formData.nome.toLowerCase())
+    const emailExiste = usuariosExistentes.find(u => u.email.toLowerCase() === formData.email.toLowerCase())
+    
+    if (nomeExiste) {
+      alert('Nome de usuário já cadastrado!')
+      return
+    }
+    
+    if (emailExiste) {
+      alert('Email já cadastrado!')
+      return
+    }
+    
+    // Salvar usuário no localStorage para o admin visualizar
+    const novoUsuario = {
+      nome: formData.nome,
+      email: formData.email,
+      senha: formData.senha,
+      idade: formData.idade,
+      comorbidade: formData.comorbidade,
+      dataCadastro: new Date().toISOString(),
+      ultimoLogin: null
+    }
+    
+    usuariosExistentes.push(novoUsuario)
+    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosExistentes))
+    
     console.log('Dados do usuário:', formData)
-    alert('Usuário cadastrado com sucesso!')
+    alert('Conta criada com sucesso! Bem-vindo ao PharmaLife!')
     onLogin(formData)
     
     setFormData({

@@ -1585,3 +1585,76 @@
     flex-direction: column;
   }
 }
+/* Estilos para painel administrativo */
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.usuarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usuario-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.usuario-item.header {
+  background: rgba(59, 130, 246, 0.1);
+  font-weight: 600;
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+}
+
+.usuario-item:not(.header) {
+  background: rgba(248, 249, 250, 0.8);
+  border: 1px solid #e5e7eb;
+}
+
+.usuario-item:not(.header):hover {
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.usuario-item span {
+  font-size: 0.9rem;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.usuario-item.header span {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+/* Responsividade para admin */
+@media (max-width: 768px) {
+  .usuario-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .usuario-item span::before {
+    content: attr(data-label) ': ';
+    font-weight: 600;
+    color: #6b7280;
+  }
+  
+  .usuario-item.header span::before {
+    content: '';
+  }
+}

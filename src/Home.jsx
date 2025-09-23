@@ -5,6 +5,8 @@ import Sobre from './Sobre'
 
 function Home({ onLogout }) {
   const [activeSection, setActiveSection] = useState('dashboard')
+  const [isAdmin] = useState(() => sessionStorage.getItem('isAdmin') === 'true')
+  const [usuarios, setUsuarios] = useState([])
   const [novoMedicamento, setNovoMedicamento] = useState({
     nome: '',
     dosagem: '',
@@ -85,20 +87,20 @@ function Home({ onLogout }) {
   }
 
   const ultimosRemedios = [
-    { nome: 'Paracetamol', horario: '08:00', data: 'Hoje', status: 'tomado' },
-    { nome: 'Ibuprofeno', horario: '14:30', data: 'Hoje', status: 'tomado' },
-    { nome: 'Omeprazol', horario: '07:00', data: 'Ontem', status: 'tomado' }
+    { nome: 'Losartana 50mg', horario: '08:00', data: 'Hoje', status: 'tomado' },
+    { nome: 'Sinvastatina 20mg', horario: '20:00', data: 'Hoje', status: 'tomado' },
+    { nome: 'Captopril 25mg', horario: '07:00', data: 'Ontem', status: 'tomado' }
   ]
 
   const agendaMedicamentos = [
-    { id: 1, nome: 'Vitamina D', dosagem: '1000mg', horario: '09:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar com alimentos', tipo: 'Suplemento' },
-    { id: 2, nome: 'Omeprazol', dosagem: '20mg', horario: '07:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar em jejum', tipo: 'Medicamento' }
+    { id: 1, nome: 'Metformina', dosagem: '850mg', horario: '09:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar com alimentos', tipo: 'Medicamento' },
+    { id: 2, nome: 'Enalapril', dosagem: '10mg', horario: '07:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar em jejum', tipo: 'Medicamento' }
   ]
 
   const historicoRemedios = [
-    { nome: 'Amoxicilina', data: '10/12/2024', horario: '08:00' },
-    { nome: 'Consulta médica', data: '20/12/2024', horario: '14:00' },
-    { nome: 'Renovar receita', data: '25/12/2024', horario: '09:00' }
+    { nome: 'Paracetamol 750mg', data: '15/12/2024', horario: '16:00' },
+    { nome: 'Amoxicilina 500mg', data: '10/12/2024', horario: '08:00' },
+    { nome: 'Dipirona 500mg', data: '08/12/2024', horario: '14:00' }
   ]
 
 
@@ -907,15 +909,100 @@ function Home({ onLogout }) {
     </>
   )
 
+  const [adminData, setAdminData] = useState({ usuarios: [], estatisticas: {} })
+
+  const carregarDadosAdmin = async () => {
+    try {
+      // Simular dados reais do localStorage para demonstração
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+      const loginsRealizados = JSON.parse(localStorage.getItem('loginsRealizados') || '[]')
+      
+      setAdminData({
+        usuarios: usuariosCadastrados,
+        estatisticas: {
+          total: usuariosCadastrados.length,
+          ativos: loginsRealizados.length,
+          novos: usuariosCadastrados.filter(u => {
+            const cadastro = new Date(u.dataCadastro)
+            const agora = new Date()
+            const diasDiff = (agora - cadastro) / (1000 * 60 * 60 * 24)
+            return diasDiff <= 7
+          }).length
+        }
+      })
+    } catch (error) {
+      console.error('Erro ao carregar dados admin:', error)
+    }
+  }
+
+  useEffect(() => {
+    if (activeSection === 'admin') {
+      carregarDadosAdmin()
+    }
+  }, [activeSection])
+
+  const renderAdmin = () => (
+    <>
+      <h2 className="section-title">Painel Administrativo</h2>
+        <div className="admin-panel">
+          <div className="card">
+            <h3>👥 Usuários Cadastrados ({adminData.usuarios.length})</h3>
+            <div className="usuarios-list">
+              <div className="usuario-item header">
+                <span>Nome</span>
+                <span>Email</span>
+                <span>Data Cadastro</span>
+                <span>Status</span>
+              </div>
+              {adminData.usuarios.length === 0 ? (
+                <div className="usuario-item">
+                  <span colSpan="4" style={{textAlign: 'center', color: '#666'}}>Nenhum usuário cadastrado ainda</span>
+                </div>
+              ) : (
+                adminData.usuarios.map((usuario, index) => (
+                  <div key={index} className="usuario-item">
+                    <span>{usuario.nome}</span>
+                    <span>{usuario.email}</span>
+                    <span>{new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')}</span>
+                    <span>{usuario.ultimoLogin ? new Date(usuario.ultimoLogin).toLocaleDateString('pt-BR') : 'Nunca logou'}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+          
+          <div className="card">
+            <h3>📊 Estatísticas</h3>
+            <div className="item">
+              <span>Total de usuários:</span>
+              <span>{adminData.estatisticas.total || 0}</span>
+            </div>
+            <div className="item">
+              <span>Usuários que já logaram:</span>
+              <span>{adminData.estatisticas.ativos || 0}</span>
+            </div>
+            <div className="item">
+              <span>Novos cadastros (7 dias):</span>
+              <span>{adminData.estatisticas.novos || 0}</span>
+            </div>
+            <div className="item">
+              <span>Taxa de atividade:</span>
+              <span>{adminData.estatisticas.total > 0 ? Math.round((adminData.estatisticas.ativos / adminData.estatisticas.total) * 100) : 0}%</span>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+
   const renderContent = () => {
     switch(activeSection) {
       case 'agenda': return renderAgenda()
       case 'historico': return renderHistorico()
-
       case 'configuracoes': return renderConfiguracoes()
       case 'ajuda': return renderAjuda()
       case 'adicionar': return renderAdicionar()
       case 'sobre': return <Sobre />
+      case 'admin': return renderAdmin()
       default: return renderDashboard()
     }
   }
@@ -926,7 +1013,7 @@ function Home({ onLogout }) {
         <div className="sidebar-header">
           <div className="logo-section">
             <div className="logo-icon">💊</div>
-            <h1>MedTracker</h1>
+            <h1>PharmaLife</h1>
           </div>
           <button 
             className="accessibility-toggle"
@@ -980,6 +1067,14 @@ function Home({ onLogout }) {
           >
             Sobre Nós
           </button>
+          {isAdmin && (
+            <button 
+              className={activeSection === 'admin' ? 'active' : ''} 
+              onClick={() => setActiveSection('admin')}
+            >
+              Admin
+            </button>
+          )}
         </nav>
       </aside>
       

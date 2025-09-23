@@ -1,30 +1,31 @@
-package com.pizza;
+package com.pharmalife;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/produtos")
+@RequestMapping("/medicamentos")
 @CrossOrigin(origins = "*")
-public class ProdutoController {
+public class MedicamentoController {
     
     @Autowired
-    private ProdutoRepository produtoRepository;
+    private MedicamentoRepository medicamentoRepository;
     
     @Autowired
     private UsuarioRepository usuarioRepository;
     
     @GetMapping("/usuario/{usuarioId}")
-    public List<Produto> listarProdutosUsuario(@PathVariable Integer usuarioId) {
-        return produtoRepository.findByUsuarioId(usuarioId);
+    public List<Medicamento> listarMedicamentosUsuario(@PathVariable Integer usuarioId) {
+        return medicamentoRepository.findByUsuarioId(usuarioId);
     }
     
     @PostMapping
-    public ResponseEntity<?> criarProduto(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<?> criarMedicamento(@RequestBody Map<String, Object> request) {
         Integer usuarioId = (Integer) request.get("usuarioId");
         Optional<Usuario> usuario = usuarioRepository.findById(usuarioId);
         
@@ -32,33 +33,34 @@ public class ProdutoController {
             return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
         }
         
-        Produto produto = new Produto();
-        produto.setNome((String) request.get("nome"));
-        produto.setPreco(((Number) request.get("preco")).doubleValue());
-        produto.setDescricao((String) request.get("descricao"));
-        produto.setCategoria((String) request.get("categoria"));
-        produto.setUsuario(usuario.get());
+        Medicamento medicamento = new Medicamento();
+        medicamento.setNome((String) request.get("nome"));
+        medicamento.setDosagem((String) request.get("dosagem"));
+        medicamento.setHorario(LocalTime.parse((String) request.get("horario")));
+        medicamento.setFrequencia((String) request.get("frequencia"));
+        medicamento.setObservacao((String) request.get("observacao"));
+        medicamento.setUsuario(usuario.get());
         
-        Produto novoProduto = produtoRepository.save(produto);
-        return ResponseEntity.ok(novoProduto);
+        Medicamento novoMedicamento = medicamentoRepository.save(medicamento);
+        return ResponseEntity.ok(novoMedicamento);
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarProduto(@PathVariable Integer id, @RequestBody Produto produto) {
-        if (!produtoRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Produto não encontrado"));
+    public ResponseEntity<?> atualizarMedicamento(@PathVariable Integer id, @RequestBody Medicamento medicamento) {
+        if (!medicamentoRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Medicamento não encontrado"));
         }
-        produto.setId(id);
-        Produto produtoAtualizado = produtoRepository.save(produto);
-        return ResponseEntity.ok(produtoAtualizado);
+        medicamento.setId(id);
+        Medicamento medicamentoAtualizado = medicamentoRepository.save(medicamento);
+        return ResponseEntity.ok(medicamentoAtualizado);
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletarProduto(@PathVariable Integer id) {
-        if (!produtoRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Produto não encontrado"));
+    public ResponseEntity<?> deletarMedicamento(@PathVariable Integer id) {
+        if (!medicamentoRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Medicamento não encontrado"));
         }
-        produtoRepository.deleteById(id);
-        return ResponseEntity.ok(Map.of("mensagem", "Produto deletado"));
+        medicamentoRepository.deleteById(id);
+        return ResponseEntity.ok(Map.of("mensagem", "Medicamento deletado"));
     }
 }
