@@ -1,4 +1,4 @@
-package com.pharmalife;
+package com.pizza;
 
 import jakarta.persistence.*;
 import java.time.LocalTime;
@@ -22,6 +22,9 @@ public class Medicamento {
     @Column(nullable = false, length = 50)
     private String frequencia;
     
+    @Column(length = 100)
+    private String duracao;
+    
     @Column(length = 500)
     private String observacao;
     
@@ -43,6 +46,9 @@ public class Medicamento {
     
     public String getFrequencia() { return frequencia; }
     public void setFrequencia(String frequencia) { this.frequencia = frequencia; }
+    
+    public String getDuracao() { return duracao; }
+    public void setDuracao(String duracao) { this.duracao = duracao; }
     
     public String getObservacao() { return observacao; }
     public void setObservacao(String observacao) { this.observacao = observacao; }

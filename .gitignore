@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Backend compiled files
+pizza-backend/target/
+pizza-backend/.mvn/
+pizza-backend/mvnw
+pizza-backend/mvnw.cmd
+
+# IDE files
+*.iml
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

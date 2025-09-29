@@ -592,8 +592,6 @@
   overflow: hidden;
 }
 
-
-
 .card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
@@ -1453,6 +1451,83 @@
   margin: 0 1rem 1.5rem 1rem;
 }
 
+/* Estilos para histórico */
+.historico-item {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  height: auto;
+  margin-bottom: 1rem;
+}
+
+.historico-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.historico-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.historico-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.historico-info {
+  flex: 1;
+}
+
+.historico-info h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.historico-acao {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.historico-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  text-align: right;
+}
+
+.historico-detalhes {
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.historico-detalhes p {
+  margin: 0;
+  color: #4a5568;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -1509,8 +1584,6 @@
     height: auto;
   }
   
-
-  
   .dashboard, .agenda, .historico, .farmacias, .configuracoes, .ajuda {
     grid-template-columns: 1fr;
   }
@@ -1519,9 +1592,16 @@
     width: 95%;
     margin: 1rem;
   }
+  
+  .historico-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .historico-time {
+    align-items: center;
+  }
 }
-
-
 
 @media (max-width: 1024px) {
   .dashboard-main {
@@ -1585,6 +1665,7 @@
     flex-direction: column;
   }
 }
+
 /* Estilos para painel administrativo */
 .admin-panel {
   display: flex;

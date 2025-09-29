@@ -14,15 +14,20 @@ public class HistoricoMedicamento {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
     
-    @ManyToOne
-    @JoinColumn(name = "medicamento_id", nullable = false)
-    private Medicamento medicamento;
+    @Column(nullable = false)
+    private String nomeMedicamento;
+    
+    @Column
+    private String dosagem;
     
     @Column(nullable = false)
-    private LocalDateTime dataTomada = LocalDateTime.now();
+    private String acao; // "ADICIONADO", "EDITADO", "EXCLUIDO", "TOMADO"
+    
+    @Column(columnDefinition = "TEXT")
+    private String detalhes; // Detalhes da operação
     
     @Column(nullable = false)
-    private Boolean tomado = true;
+    private LocalDateTime dataHora = LocalDateTime.now();
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -30,12 +35,18 @@ public class HistoricoMedicamento {
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
     
-    public Medicamento getMedicamento() { return medicamento; }
-    public void setMedicamento(Medicamento medicamento) { this.medicamento = medicamento; }
+    public String getNomeMedicamento() { return nomeMedicamento; }
+    public void setNomeMedicamento(String nomeMedicamento) { this.nomeMedicamento = nomeMedicamento; }
     
-    public LocalDateTime getDataTomada() { return dataTomada; }
-    public void setDataTomada(LocalDateTime dataTomada) { this.dataTomada = dataTomada; }
+    public String getDosagem() { return dosagem; }
+    public void setDosagem(String dosagem) { this.dosagem = dosagem; }
     
-    public Boolean getTomado() { return tomado; }
-    public void setTomado(Boolean tomado) { this.tomado = tomado; }
+    public String getAcao() { return acao; }
+    public void setAcao(String acao) { this.acao = acao; }
+    
+    public String getDetalhes() { return detalhes; }
+    public void setDetalhes(String detalhes) { this.detalhes = detalhes; }
+    
+    public LocalDateTime getDataHora() { return dataHora; }
+    public void setDataHora(LocalDateTime dataHora) { this.dataHora = dataHora; }
 }

@@ -1,4 +1,4 @@
-package com.pharmalife;
+package com.pizza;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

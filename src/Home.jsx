@@ -18,11 +18,16 @@ function Home({ onLogout }) {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [medicamentos, setMedicamentos] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [estatisticas, setEstatisticas] = useState({ adesao: 0, tomados: 0, total: 0 })
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [perfil, setPerfil] = useState({
-    nome: 'Usuário',
-    senha: '*****',
-    idade: '30'
+    nome: '',
+    senha: '',
+    email: '',
+    idade: '',
+    comorbidade: ''
   })
   const [darkMode, setDarkMode] = useState(false)
   const [accessibilityMode, setAccessibilityMode] = useState(() => {
@@ -45,6 +50,7 @@ function Home({ onLogout }) {
     horario: ''
   })
   const [lembretes, setLembretes] = useState([])
+  const [historicoCompleto, setHistoricoCompleto] = useState([])
 
   const showToastMessage = (message) => {
     setToastMessage(message)
@@ -63,9 +69,38 @@ function Home({ onLogout }) {
     }
   }
 
-  const marcarComoTomado = (medicamentoId) => {
-    setMedicamentosTomados([...medicamentosTomados, medicamentoId])
-    showToastMessage('✅ Medicamento marcado como tomado!')
+  const marcarComoTomado = async (medicamentoId) => {
+    try {
+      const usuarioId = sessionStorage.getItem('userId') || 1
+      const response = await fetch('http://localhost:8080/medicamentos/marcar-tomado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ medicamentoId, usuarioId })
+      })
+      
+      if (response.ok) {
+        setMedicamentosTomados([...medicamentosTomados, medicamentoId])
+        showToastMessage('✅ Medicamento marcado como tomado!')
+        carregarHistoricoCompleto()
+        carregarEstatisticas()
+        carregarHistoricoRecente()
+      }
+    } catch (error) {
+      // Fallback para localStorage
+      const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
+      const novoTomado = {
+        medicamentoId,
+        dataHora: new Date().toISOString(),
+        usuario: sessionStorage.getItem('userName')
+      }
+      medicamentosTomadosLocal.push(novoTomado)
+      localStorage.setItem('medicamentosTomados', JSON.stringify(medicamentosTomadosLocal))
+      
+      setMedicamentosTomados([...medicamentosTomados, medicamentoId])
+      showToastMessage('✅ Medicamento marcado como tomado!')
+      carregarEstatisticas()
+      carregarHistoricoRecente()
+    }
   }
 
   const getStatusBadge = (status) => {
@@ -80,22 +115,104 @@ function Home({ onLogout }) {
     return badges[status] || { color: '#9ca3af', text: 'N/A' }
   }
 
-  const calcularAdesao = () => {
-    const totalMedicamentos = agendaMedicamentos.length * 7
-    const medicamentosTomadosCount = medicamentosTomados.length + 12
-    return Math.round((medicamentosTomadosCount / totalMedicamentos) * 100)
+  const carregarEstatisticas = () => {
+    const userName = sessionStorage.getItem('userName')
+    const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
+    const medicamentosUsuario = medicamentosTomadosLocal.filter(mt => mt.usuario === userName)
+    
+    const totalMedicamentos = medicamentos.length * 7 // 7 dias
+    const tomados = medicamentosUsuario.length
+    const adesao = totalMedicamentos > 0 ? Math.round((tomados / totalMedicamentos) * 100) : 0
+    
+    setEstatisticas({ adesao, tomados, total: totalMedicamentos })
   }
+  
+  useEffect(() => {
+    carregarEstatisticas()
+  }, [medicamentos])
 
-  const ultimosRemedios = [
-    { nome: 'Losartana 50mg', horario: '08:00', data: 'Hoje', status: 'tomado' },
-    { nome: 'Sinvastatina 20mg', horario: '20:00', data: 'Hoje', status: 'tomado' },
-    { nome: 'Captopril 25mg', horario: '07:00', data: 'Ontem', status: 'tomado' }
-  ]
+  const [historicoRecente, setHistoricoRecente] = useState([])
+  
+  const carregarHistoricoRecente = () => {
+    const userName = sessionStorage.getItem('userName')
+    const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
+    const medicamentosLocal = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+    
+    const historicoUsuario = medicamentosTomadosLocal
+      .filter(mt => mt.usuario === userName)
+      .map(mt => {
+        const medicamento = medicamentosLocal.find(m => m.id === mt.medicamentoId)
+        const dataHora = new Date(mt.dataHora)
+        const hoje = new Date()
+        const ontem = new Date(hoje)
+        ontem.setDate(hoje.getDate() - 1)
+        
+        let dataTexto = 'Hoje'
+        if (dataHora.toDateString() === ontem.toDateString()) {
+          dataTexto = 'Ontem'
+        } else if (dataHora.toDateString() !== hoje.toDateString()) {
+          dataTexto = dataHora.toLocaleDateString('pt-BR')
+        }
+        
+        return {
+          nome: medicamento ? `${medicamento.nome} ${medicamento.dosagem}` : 'Medicamento',
+          horario: dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          data: dataTexto,
+          status: 'tomado'
+        }
+      })
+      .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+      .slice(0, 3)
+    
+    setHistoricoRecente(historicoUsuario)
+  }
+  
+  useEffect(() => {
+    carregarHistoricoRecente()
+  }, [medicamentos])
+  
+  const ultimosRemedios = historicoRecente
 
-  const agendaMedicamentos = [
-    { id: 1, nome: 'Metformina', dosagem: '850mg', horario: '09:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar com alimentos', tipo: 'Medicamento' },
-    { id: 2, nome: 'Enalapril', dosagem: '10mg', horario: '07:00', frequencia: 'Diário', status: 'próximo', observacao: 'Tomar em jejum', tipo: 'Medicamento' }
-  ]
+  const carregarMedicamentos = async () => {
+    const userName = sessionStorage.getItem('userName')
+    if (!userName) return
+    
+    setLoading(true)
+    try {
+      let usuarioId = sessionStorage.getItem('userId')
+      if (!usuarioId) {
+        usuarioId = 1 // ID padrão para testes
+        sessionStorage.setItem('userId', usuarioId)
+      }
+      
+      const response = await fetch(`http://localhost:8080/medicamentos/usuario/${usuarioId}`)
+      if (response.ok) {
+        const medicamentosBackend = await response.json()
+        setMedicamentos(medicamentosBackend)
+        // Sincronizar com localStorage
+        localStorage.setItem('medicamentos', JSON.stringify(medicamentosBackend))
+      } else {
+        throw new Error('Backend não disponível')
+      }
+    } catch (error) {
+      console.log('Usando localStorage como fallback')
+      // Fallback para localStorage
+      const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+      const medicamentosUsuario = medicamentosExistentes.filter(med => med.usuario === userName)
+      setMedicamentos(medicamentosUsuario)
+    }
+    setLoading(false)
+  }
+  
+  useEffect(() => {
+    carregarMedicamentos()
+  }, [])
+  
+  const agendaMedicamentos = medicamentos.map(med => ({
+    ...med,
+    horario: med.horario,
+    status: 'próximo'
+  }))
 
   const historicoRemedios = [
     { nome: 'Paracetamol 750mg', data: '15/12/2024', horario: '16:00' },
@@ -106,7 +223,7 @@ function Home({ onLogout }) {
 
 
   const renderDashboard = () => {
-    const adesao = calcularAdesao()
+    const adesao = estatisticas.adesao
     const agora = new Date()
     const hora = agora.getHours()
     const userName = sessionStorage.getItem('userName') || 'Usuário'
@@ -126,14 +243,14 @@ function Home({ onLogout }) {
             <div className="stat-card">
               <div className="stat-icon">💊</div>
               <div className="stat-info">
-                <span className="stat-number">{medicamentosTomados.length + 2}</span>
+                <span className="stat-number">{estatisticas.tomados}</span>
                 <span className="stat-label">Tomados hoje</span>
               </div>
             </div>
             <div className="stat-card">
               <div className="stat-icon">⏰</div>
               <div className="stat-info">
-                <span className="stat-number">2</span>
+                <span className="stat-number">{medicamentos.length - medicamentosTomados.length}</span>
                 <span className="stat-label">Pendentes</span>
               </div>
             </div>
@@ -156,7 +273,20 @@ function Home({ onLogout }) {
               <span className="card-badge urgent">Urgente</span>
             </div>
             <div className="medication-timeline">
-              {agendaMedicamentos.slice(0, 3).map((med, index) => {
+              {loading ? (
+                <div style={{textAlign: 'center', padding: '20px'}}>Carregando...</div>
+              ) : agendaMedicamentos.length === 0 ? (
+                <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                  Nenhum medicamento cadastrado ainda.
+                  <br />
+                  <button 
+                    onClick={() => setActiveSection('adicionar')}
+                    style={{marginTop: '10px', padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}
+                  >
+                    Adicionar Primeiro Medicamento
+                  </button>
+                </div>
+              ) : agendaMedicamentos.slice(0, 3).map((med, index) => {
                 const jaTomado = medicamentosTomados.includes(med.id)
                 return (
                   <div key={index} className="timeline-item">
@@ -178,16 +308,6 @@ function Home({ onLogout }) {
                   </div>
                 )
               })}
-              <div className="timeline-item">
-                <div className="timeline-time">15:00</div>
-                <div className="timeline-content">
-                  <div className="med-info">
-                    <h4>Dipirona</h4>
-                    <span className="med-dosage">500mg</span>
-                  </div>
-                  <button className="btn-check" onClick={() => marcarComoTomado(3)}>✓</button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -214,11 +334,11 @@ function Home({ onLogout }) {
               <div className="adherence-info">
                 <div className="adherence-item">
                   <span className="dot success"></span>
-                  <span>Tomados: {medicamentosTomados.length + 12}</span>
+                  <span>Tomados: {estatisticas.tomados}</span>
                 </div>
                 <div className="adherence-item">
                   <span className="dot warning"></span>
-                  <span>Perdidos: 3</span>
+                  <span>Perdidos: 0</span>
                 </div>
               </div>
             </div>
@@ -231,15 +351,23 @@ function Home({ onLogout }) {
               <button className="btn-link" onClick={() => setActiveSection('historico')}>Ver tudo</button>
             </div>
             <div className="recent-history">
-              {ultimosRemedios.map((remedio, index) => (
-                <div key={index} className="history-item">
-                  <div className="history-icon">✅</div>
-                  <div className="history-info">
-                    <span className="history-med">{remedio.nome}</span>
-                    <span className="history-time">{remedio.data} às {remedio.horario}</span>
-                  </div>
+              {ultimosRemedios.length === 0 ? (
+                <div style={{textAlign: 'center', color: '#666', padding: '20px'}}>
+                  Nenhum medicamento tomado ainda.
+                  <br />
+                  Marque medicamentos como tomados para ver o histórico.
                 </div>
-              ))}
+              ) : (
+                ultimosRemedios.map((remedio, index) => (
+                  <div key={index} className="history-item">
+                    <div className="history-icon">✅</div>
+                    <div className="history-info">
+                      <span className="history-med">{remedio.nome}</span>
+                      <span className="history-time">{remedio.data} às {remedio.horario}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -250,27 +378,44 @@ function Home({ onLogout }) {
               <button className="btn-link" onClick={() => setActiveSection('adicionar')}>Adicionar</button>
             </div>
             <div className="reminders-list">
-              <div className="reminder-item priority">
-                <div className="reminder-icon">🏥</div>
-                <div className="reminder-content">
-                  <span className="reminder-title">Consulta médica</span>
-                  <span className="reminder-time">Amanhã às 14:00</span>
+              {lembretes.length === 0 ? (
+                <div style={{textAlign: 'center', color: '#666', padding: '20px'}}>
+                  Nenhum lembrete cadastrado ainda.
+                  <br />
+                  <button 
+                    onClick={() => setActiveSection('adicionar')}
+                    style={{marginTop: '10px', padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}
+                  >
+                    Adicionar Lembrete
+                  </button>
                 </div>
-              </div>
-              <div className="reminder-item">
-                <div className="reminder-icon">📄</div>
-                <div className="reminder-content">
-                  <span className="reminder-title">Renovar receita</span>
-                  <span className="reminder-time">25/12 às 09:00</span>
-                </div>
-              </div>
-              <div className="reminder-item">
-                <div className="reminder-icon">🩸</div>
-                <div className="reminder-content">
-                  <span className="reminder-title">Exame de sangue</span>
-                  <span className="reminder-time">30/12 às 08:00</span>
-                </div>
-              </div>
+              ) : (
+                lembretes.slice(0, 3).map((lembrete, index) => {
+                  const dataLembrete = new Date(lembrete.data)
+                  const hoje = new Date()
+                  const amanha = new Date(hoje)
+                  amanha.setDate(hoje.getDate() + 1)
+                  
+                  let dataTexto = dataLembrete.toLocaleDateString('pt-BR')
+                  if (dataLembrete.toDateString() === hoje.toDateString()) {
+                    dataTexto = 'Hoje'
+                  } else if (dataLembrete.toDateString() === amanha.toDateString()) {
+                    dataTexto = 'Amanhã'
+                  }
+                  
+                  const isPriority = dataLembrete <= amanha
+                  
+                  return (
+                    <div key={index} className={`reminder-item ${isPriority ? 'priority' : ''}`}>
+                      <div className="reminder-icon">🔔</div>
+                      <div className="reminder-content">
+                        <span className="reminder-title">{lembrete.titulo}</span>
+                        <span className="reminder-time">{dataTexto} às {lembrete.horario}</span>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
             </div>
           </div>
         </div>
@@ -278,11 +423,45 @@ function Home({ onLogout }) {
     )
   }
 
-  const handleAddMedicamento = () => {
+  const handleAddMedicamento = async () => {
     if (novoMedicamento.nome && novoMedicamento.dosagem && novoMedicamento.horario) {
-      console.log('Novo medicamento:', novoMedicamento)
-      showToastMessage('✨ Medicamento adicionado com sucesso!')
-      setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
+      try {
+        let usuarioId = sessionStorage.getItem('userId')
+        if (!usuarioId) {
+          usuarioId = 1
+          sessionStorage.setItem('userId', usuarioId)
+        }
+        
+        const response = await fetch('http://localhost:8080/medicamentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...novoMedicamento, usuarioId: parseInt(usuarioId) })
+        })
+        
+        if (response.ok) {
+          showToastMessage('✨ Medicamento adicionado com sucesso!')
+          setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
+          await carregarMedicamentos()
+          carregarHistoricoCompleto()
+        } else {
+          throw new Error('Erro no backend')
+        }
+      } catch (error) {
+        console.log('Usando localStorage para adição')
+        // Fallback para localStorage
+        const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+        const novoMed = {
+          id: Date.now(),
+          ...novoMedicamento,
+          usuario: sessionStorage.getItem('userName')
+        }
+        medicamentosExistentes.push(novoMed)
+        localStorage.setItem('medicamentos', JSON.stringify(medicamentosExistentes))
+        
+        showToastMessage('✨ Medicamento adicionado com sucesso!')
+        setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
+        await carregarMedicamentos()
+      }
     } else {
       showToastMessage('⚠️ Preencha todos os campos obrigatórios!')
     }
@@ -291,12 +470,126 @@ function Home({ onLogout }) {
   const handleAddLembrete = (e) => {
     e.preventDefault()
     if (novoLembrete.titulo && novoLembrete.data && novoLembrete.horario) {
-      const novoId = lembretes.length + 1
-      setLembretes([...lembretes, { ...novoLembrete, id: novoId }])
+      const lembretesExistentes = JSON.parse(localStorage.getItem('lembretes') || '[]')
+      const novoLembreteObj = {
+        id: Date.now(),
+        ...novoLembrete,
+        usuario: sessionStorage.getItem('userName')
+      }
+      lembretesExistentes.push(novoLembreteObj)
+      localStorage.setItem('lembretes', JSON.stringify(lembretesExistentes))
+      
       showToastMessage('Lembrete adicionado com sucesso!')
       setNovoLembrete({ titulo: '', descricao: '', data: '', horario: '' })
+      carregarLembretes()
     }
   }
+  
+  const carregarLembretes = () => {
+    const userName = sessionStorage.getItem('userName')
+    if (!userName) return
+    
+    const lembretesExistentes = JSON.parse(localStorage.getItem('lembretes') || '[]')
+    const lembretesUsuario = lembretesExistentes.filter(l => l.usuario === userName)
+    setLembretes(lembretesUsuario)
+  }
+  
+  const carregarHistoricoCompleto = async () => {
+    try {
+      let usuarioId = sessionStorage.getItem('userId')
+      if (!usuarioId) {
+        usuarioId = 1
+        sessionStorage.setItem('userId', usuarioId)
+      }
+      
+      const response = await fetch(`http://localhost:8080/historico/usuario/${usuarioId}`)
+      if (response.ok) {
+        const historico = await response.json()
+        setHistoricoCompleto(historico)
+      } else {
+        throw new Error('Backend não disponível')
+      }
+    } catch (error) {
+      // Fallback para localStorage
+      const userName = sessionStorage.getItem('userName')
+      const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
+      const historicoExclusoes = JSON.parse(localStorage.getItem('historicoExclusoes') || '[]')
+      const medicamentosLocal = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+      
+      // Histórico de medicamentos tomados
+      const historicoTomados = medicamentosTomadosLocal
+        .filter(mt => mt.usuario === userName)
+        .map(mt => {
+          const medicamento = medicamentosLocal.find(m => m.id === mt.medicamentoId)
+          return {
+            nomeMedicamento: medicamento ? medicamento.nome : 'Medicamento',
+            dosagem: medicamento ? medicamento.dosagem : '',
+            acao: 'TOMADO',
+            dataHora: mt.dataHora,
+            detalhes: `Medicamento tomado conforme programado`
+          }
+        })
+      
+      // Histórico de exclusões
+      const historicoExcluidos = historicoExclusoes
+        .filter(he => he.usuario === userName)
+        .map(he => ({
+          nomeMedicamento: he.nomeMedicamento,
+          dosagem: he.dosagem,
+          acao: 'EXCLUIDO',
+          dataHora: he.dataHora,
+          detalhes: `Medicamento removido da agenda`
+        }))
+      
+      // Combinar e ordenar todos os históricos
+      const historicoLocal = [...historicoTomados, ...historicoExcluidos]
+        .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
+      
+      setHistoricoCompleto(historicoLocal)
+    }
+  }
+  
+  const carregarPerfilUsuario = async () => {
+    try {
+      const userId = sessionStorage.getItem('userId')
+      if (userId) {
+        const response = await fetch(`http://localhost:8080/usuarios/${userId}`)
+        if (response.ok) {
+          const usuario = await response.json()
+          setPerfil({
+            nome: usuario.nome,
+            senha: '******',
+            email: usuario.email,
+            idade: usuario.idade || '',
+            comorbidade: usuario.comorbidade || ''
+          })
+          return
+        }
+      }
+    } catch (error) {
+      console.log('Usando dados do sessionStorage')
+    }
+    
+    // Fallback para sessionStorage
+    const userName = sessionStorage.getItem('userName')
+    const userEmail = sessionStorage.getItem('userEmail')
+    
+    if (userName) {
+      setPerfil({
+        nome: userName,
+        senha: '******',
+        email: userEmail || '',
+        idade: '',
+        comorbidade: ''
+      })
+    }
+  }
+  
+  useEffect(() => {
+    carregarLembretes()
+    carregarHistoricoCompleto()
+    carregarPerfilUsuario()
+  }, [])
 
   const handleEditMedicamento = (med) => {
     setEditingMed(med)
@@ -310,37 +603,127 @@ function Home({ onLogout }) {
     setShowEditModal(true)
   }
 
-  const handleSaveEdit = (e) => {
+  const handleSaveEdit = async (e) => {
     e.preventDefault()
     try {
-      // Aqui você salvaria as alterações
+      const response = await fetch(`http://localhost:8080/medicamentos/${editingMed.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(editMedicamento)
+      })
+      
+      if (response.ok) {
+        showToastMessage('Medicamento atualizado com sucesso!')
+        setShowEditModal(false)
+        setEditingMed(null)
+        await carregarMedicamentos()
+        carregarHistoricoCompleto()
+      } else {
+        const errorData = await response.json()
+        showToastMessage(errorData.erro || 'Erro ao atualizar medicamento')
+      }
+    } catch (error) {
+      console.log('Usando localStorage para edição')
+      // Fallback para localStorage se backend não disponível
+      const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+      const medicamentosAtualizados = medicamentosExistentes.map(med => 
+        med.id === editingMed.id ? { ...med, ...editMedicamento } : med
+      )
+      localStorage.setItem('medicamentos', JSON.stringify(medicamentosAtualizados))
+      
       showToastMessage('Medicamento atualizado com sucesso!')
       setShowEditModal(false)
       setEditingMed(null)
-    } catch (error) {
-      showToastMessage('Erro ao atualizar medicamento')
+      await carregarMedicamentos()
     }
   }
 
-  const handleDeleteMedicamento = (medId) => {
+  const handleDeleteMedicamento = async (medId) => {
     if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
       try {
-        // Aqui você removeria o medicamento
-        showToastMessage('Medicamento excluído com sucesso!')
+        const response = await fetch(`http://localhost:8080/medicamentos/${medId}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          showToastMessage('Medicamento excluído com sucesso!')
+          await carregarMedicamentos()
+          setTimeout(() => carregarHistoricoCompleto(), 500)
+        } else {
+          const errorData = await response.json()
+          showToastMessage(errorData.erro || 'Erro ao excluir medicamento')
+        }
       } catch (error) {
-        showToastMessage('Erro ao excluir medicamento')
+        // Fallback para localStorage
+        const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+        const medicamento = medicamentosExistentes.find(med => med.id === medId)
+        
+        // Registrar exclusão no histórico
+        if (medicamento) {
+          const historicoExclusao = JSON.parse(localStorage.getItem('historicoExclusoes') || '[]')
+          historicoExclusao.push({
+            medicamentoId: medId,
+            nomeMedicamento: medicamento.nome,
+            dosagem: medicamento.dosagem,
+            acao: 'EXCLUIDO',
+            dataHora: new Date().toISOString(),
+            usuario: sessionStorage.getItem('userName')
+          })
+          localStorage.setItem('historicoExclusoes', JSON.stringify(historicoExclusao))
+        }
+        
+        const medicamentosAtualizados = medicamentosExistentes.filter(med => med.id !== medId)
+        localStorage.setItem('medicamentos', JSON.stringify(medicamentosAtualizados))
+        
+        showToastMessage('Medicamento excluído com sucesso!')
+        await carregarMedicamentos()
+        await carregarHistoricoCompleto()
       }
     }
   }
 
-  const handleDeleteMedicamentoModal = () => {
-    try {
-      // Aqui você removeria o medicamento
-      showToastMessage('Medicamento excluído com sucesso!')
-      setShowEditModal(false)
-      setEditingMed(null)
-    } catch (error) {
-      showToastMessage('Erro ao excluir medicamento')
+  const handleDeleteMedicamentoModal = async () => {
+    if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
+      try {
+        const response = await fetch(`http://localhost:8080/medicamentos/${editingMed.id}`, {
+          method: 'DELETE'
+        })
+        
+        if (response.ok) {
+          showToastMessage('Medicamento excluído com sucesso!')
+          setShowEditModal(false)
+          setEditingMed(null)
+          await carregarMedicamentos()
+          setTimeout(() => carregarHistoricoCompleto(), 500)
+        } else {
+          const errorData = await response.json()
+          showToastMessage(errorData.erro || 'Erro ao excluir medicamento')
+        }
+      } catch (error) {
+        // Registrar exclusão no histórico
+        const historicoExclusao = JSON.parse(localStorage.getItem('historicoExclusoes') || '[]')
+        historicoExclusao.push({
+          medicamentoId: editingMed.id,
+          nomeMedicamento: editingMed.nome,
+          dosagem: editingMed.dosagem,
+          acao: 'EXCLUIDO',
+          dataHora: new Date().toISOString(),
+          usuario: sessionStorage.getItem('userName')
+        })
+        localStorage.setItem('historicoExclusoes', JSON.stringify(historicoExclusao))
+        
+        const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
+        const medicamentosAtualizados = medicamentosExistentes.filter(med => med.id !== editingMed.id)
+        localStorage.setItem('medicamentos', JSON.stringify(medicamentosAtualizados))
+        
+        showToastMessage('Medicamento excluído com sucesso!')
+        setShowEditModal(false)
+        setEditingMed(null)
+        await carregarMedicamentos()
+        await carregarHistoricoCompleto()
+      }
     }
   }
 
@@ -370,7 +753,20 @@ function Home({ onLogout }) {
           </button>
         </div>
         <div className="agenda">
-          {medicamentosFiltrados.map((med, index) => {
+          {loading ? (
+            <div style={{textAlign: 'center', padding: '40px'}}>Carregando medicamentos...</div>
+          ) : medicamentosFiltrados.length === 0 ? (
+            <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+              {searchTerm ? 'Nenhum medicamento encontrado com esse nome.' : 'Nenhum medicamento cadastrado ainda.'}
+              <br />
+              <button 
+                onClick={() => setActiveSection('adicionar')}
+                style={{marginTop: '15px', padding: '10px 20px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer'}}
+              >
+                Adicionar Medicamento
+              </button>
+            </div>
+          ) : medicamentosFiltrados.map((med, index) => {
             const badge = getStatusBadge(med.status)
             const jaTomado = medicamentosTomados.includes(med.id)
             return (
@@ -539,59 +935,118 @@ function Home({ onLogout }) {
           </form>
         </div>
 
-        {lembretes.map((lembrete, index) => (
-          <div key={index} className="card">
-            <div className="card-header">
-              <h4>{lembrete.titulo}</h4>
-            </div>
-            {lembrete.descricao && (
-              <div className="item">
-                <span>Descrição:</span>
-                <span>{lembrete.descricao}</span>
-              </div>
-            )}
-            <div className="item">
-              <span>Data:</span>
-              <span>{new Date(lembrete.data).toLocaleDateString('pt-BR')}</span>
-            </div>
-            <div className="item">
-              <span>Horário:</span>
-              <span>{lembrete.horario}</span>
-            </div>
-          </div>
-        ))}
+
       </div>
     </>
   )
 
-  const renderHistorico = () => (
-    <>
-      <h2 className="section-title">Histórico de Remédios</h2>
-      <div className="historico">
-        {historicoRemedios.map((remedio, index) => (
-          <div key={index} className="card">
-
-            <h4>{remedio.nome}</h4>
-            <div className="item">
-              <span>Data:</span>
-              <span>{remedio.data}</span>
+  const renderHistorico = () => {
+    const getAcaoIcon = (acao) => {
+      switch(acao) {
+        case 'ADICIONADO': return '➕'
+        case 'EDITADO': return '✏️'
+        case 'EXCLUIDO': return '🗑️'
+        case 'TOMADO': return '✅'
+        default: return '📋'
+      }
+    }
+    
+    const getAcaoColor = (acao) => {
+      switch(acao) {
+        case 'ADICIONADO': return '#10b981'
+        case 'EDITADO': return '#f59e0b'
+        case 'EXCLUIDO': return '#ef4444'
+        case 'TOMADO': return '#3b82f6'
+        default: return '#6b7280'
+      }
+    }
+    
+    return (
+      <>
+        <h2 className="section-title">Histórico de Medicamentos</h2>
+        <div className="historico">
+          {historicoCompleto.length === 0 ? (
+            <div className="card" style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+              <h3>📋 Nenhum histórico ainda</h3>
+              <p>Quando você adicionar, editar, excluir ou tomar medicamentos, o histórico aparecerá aqui.</p>
             </div>
-            <div className="item">
-              <span>Horário:</span>
-              <span>{remedio.horario}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
-  )
+          ) : (
+            historicoCompleto.map((item, index) => {
+              const dataHora = new Date(item.dataHora)
+              const hoje = new Date()
+              const ontem = new Date(hoje)
+              ontem.setDate(hoje.getDate() - 1)
+              
+              let dataTexto = dataHora.toLocaleDateString('pt-BR')
+              if (dataHora.toDateString() === hoje.toDateString()) {
+                dataTexto = 'Hoje'
+              } else if (dataHora.toDateString() === ontem.toDateString()) {
+                dataTexto = 'Ontem'
+              }
+              
+              return (
+                <div key={index} className="card historico-item">
+                  <div className="historico-header">
+                    <div className="historico-icon" style={{backgroundColor: getAcaoColor(item.acao)}}>
+                      {getAcaoIcon(item.acao)}
+                    </div>
+                    <div className="historico-info">
+                      <h4>{item.nomeMedicamento} {item.dosagem}</h4>
+                      <span className="historico-acao">{item.acao}</span>
+                    </div>
+                    <div className="historico-time">
+                      <span>{dataTexto}</span>
+                      <span>{dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                  {item.detalhes && (
+                    <div className="historico-detalhes">
+                      <p>{item.detalhes}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })
+          )}
+        </div>
+      </>
+    )
+  }
 
 
 
-  const handleSavePerfil = (e) => {
+  const handleSavePerfil = async (e) => {
     e.preventDefault()
-    showToastMessage('✅ Perfil atualizado com sucesso!')
-    setShowProfileModal(false)
+    
+    try {
+      const userId = sessionStorage.getItem('userId')
+      const response = await fetch(`http://localhost:8080/usuarios/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: perfil.nome,
+          senha: perfil.senha,
+          email: perfil.email,
+          idade: perfil.idade,
+          comorbidade: perfil.comorbidade
+        })
+      })
+      
+      if (response.ok) {
+        sessionStorage.setItem('userName', perfil.nome)
+        sessionStorage.setItem('userEmail', perfil.email)
+        showToastMessage('✅ Perfil atualizado com sucesso!')
+        setShowProfileModal(false)
+      } else {
+        throw new Error('Erro no backend')
+      }
+    } catch (error) {
+      // Fallback para localStorage
+      sessionStorage.setItem('userName', perfil.nome)
+      sessionStorage.setItem('userEmail', perfil.email)
+      showToastMessage('✅ Perfil atualizado com sucesso!')
+      setShowProfileModal(false)
+    }
   }
 
   const renderConfiguracoes = () => (
@@ -633,13 +1088,24 @@ function Home({ onLogout }) {
           <div className="perfil-info">
             <div className="item">
               <span>Nome:</span>
-              <span>{perfil.nome}</span>
+              <span>{perfil.nome || 'Carregando...'}</span>
+            </div>
+            <div className="item">
+              <span>Email:</span>
+              <span>{perfil.email || 'Não informado'}</span>
+            </div>
+            <div className="item">
+              <span>Idade:</span>
+              <span>{perfil.idade || 'Não informado'}</span>
+            </div>
+            <div className="item">
+              <span>Comorbidade:</span>
+              <span>{perfil.comorbidade || 'Nenhuma'}</span>
             </div>
             <div className="item">
               <span>Senha:</span>
-              <span>{perfil.senha}</span>
+              <span>******</span>
             </div>
-
           </div>
           <div style={{textAlign: 'center'}}>
             <button className="btn-config" onClick={() => setShowProfileModal(true)}>Editar Perfil</button>
@@ -661,19 +1127,29 @@ function Home({ onLogout }) {
                 required
               />
               <input
-                type="password"
-                placeholder="Senha"
-                value={perfil.senha}
-                onChange={(e) => setPerfil({...perfil, senha: e.target.value})}
+                type="email"
+                placeholder="Email"
+                value={perfil.email}
+                onChange={(e) => setPerfil({...perfil, email: e.target.value})}
                 required
               />
-
+              <input
+                type="password"
+                placeholder="Nova senha (deixe vazio para manter atual)"
+                value={perfil.senha === '******' ? '' : perfil.senha}
+                onChange={(e) => setPerfil({...perfil, senha: e.target.value})}
+              />
               <input
                 type="number"
                 placeholder="Idade"
                 value={perfil.idade}
                 onChange={(e) => setPerfil({...perfil, idade: e.target.value})}
-                required
+              />
+              <input
+                type="text"
+                placeholder="Comorbidade (opcional)"
+                value={perfil.comorbidade}
+                onChange={(e) => setPerfil({...perfil, comorbidade: e.target.value})}
               />
               <div className="modal-buttons">
                 <button type="button" className="btn-cancel" onClick={() => setShowProfileModal(false)}>Cancelar</button>
@@ -913,25 +1389,38 @@ function Home({ onLogout }) {
 
   const carregarDadosAdmin = async () => {
     try {
-      // Simular dados reais do localStorage para demonstração
+      const response = await fetch('http://localhost:8080/admin/usuarios')
+      if (response.ok) {
+        const usuarios = await response.json()
+        const agora = new Date()
+        const novos = usuarios.filter(u => {
+          const cadastro = new Date(u.dataCadastro || u.createdAt)
+          const diasDiff = (agora - cadastro) / (1000 * 60 * 60 * 24)
+          return diasDiff <= 7
+        }).length
+        
+        setAdminData({
+          usuarios,
+          estatisticas: {
+            total: usuarios.length,
+            novos,
+            comSenha: usuarios.filter(u => u.senha && u.senha !== '').length
+          }
+        })
+      } else {
+        throw new Error('Backend não disponível')
+      }
+    } catch (error) {
+      // Fallback para localStorage
       const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
-      const loginsRealizados = JSON.parse(localStorage.getItem('loginsRealizados') || '[]')
-      
       setAdminData({
         usuarios: usuariosCadastrados,
         estatisticas: {
           total: usuariosCadastrados.length,
-          ativos: loginsRealizados.length,
-          novos: usuariosCadastrados.filter(u => {
-            const cadastro = new Date(u.dataCadastro)
-            const agora = new Date()
-            const diasDiff = (agora - cadastro) / (1000 * 60 * 60 * 24)
-            return diasDiff <= 7
-          }).length
+          novos: 0,
+          comSenha: usuariosCadastrados.filter(u => u.senha).length
         }
       })
-    } catch (error) {
-      console.error('Erro ao carregar dados admin:', error)
     }
   }
 
@@ -952,7 +1441,7 @@ function Home({ onLogout }) {
                 <span>Nome</span>
                 <span>Email</span>
                 <span>Data Cadastro</span>
-                <span>Status</span>
+                <span>Senha</span>
               </div>
               {adminData.usuarios.length === 0 ? (
                 <div className="usuario-item">
@@ -964,7 +1453,7 @@ function Home({ onLogout }) {
                     <span>{usuario.nome}</span>
                     <span>{usuario.email}</span>
                     <span>{new Date(usuario.dataCadastro).toLocaleDateString('pt-BR')}</span>
-                    <span>{usuario.ultimoLogin ? new Date(usuario.ultimoLogin).toLocaleDateString('pt-BR') : 'Nunca logou'}</span>
+                    <span>{usuario.senha || '******'}</span>
                   </div>
                 ))
               )}
@@ -978,16 +1467,12 @@ function Home({ onLogout }) {
               <span>{adminData.estatisticas.total || 0}</span>
             </div>
             <div className="item">
-              <span>Usuários que já logaram:</span>
-              <span>{adminData.estatisticas.ativos || 0}</span>
-            </div>
-            <div className="item">
               <span>Novos cadastros (7 dias):</span>
               <span>{adminData.estatisticas.novos || 0}</span>
             </div>
             <div className="item">
-              <span>Taxa de atividade:</span>
-              <span>{adminData.estatisticas.total > 0 ? Math.round((adminData.estatisticas.ativos / adminData.estatisticas.total) * 100) : 0}%</span>
+              <span>Usuários com senha definida:</span>
+              <span>{adminData.estatisticas.comSenha || 0}</span>
             </div>
           </div>
         </div>
@@ -1083,6 +1568,56 @@ function Home({ onLogout }) {
         {showToast && (
           <div className="toast">
             {toastMessage}
+          </div>
+        )}
+        
+        {showEditModal && editingMed && (
+          <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h3>Editar Medicamento</h3>
+              <form onSubmit={handleSaveEdit} className="profile-form">
+                <input
+                  type="text"
+                  placeholder="Nome do medicamento"
+                  value={editMedicamento.nome}
+                  onChange={(e) => setEditMedicamento({...editMedicamento, nome: e.target.value})}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Dosagem"
+                  value={editMedicamento.dosagem}
+                  onChange={(e) => setEditMedicamento({...editMedicamento, dosagem: e.target.value})}
+                  required
+                />
+                <input
+                  type="time"
+                  value={editMedicamento.horario}
+                  onChange={(e) => setEditMedicamento({...editMedicamento, horario: e.target.value})}
+                  required
+                />
+                <select
+                  value={editMedicamento.frequencia}
+                  onChange={(e) => setEditMedicamento({...editMedicamento, frequencia: e.target.value})}
+                >
+                  <option value="Diário">Diário</option>
+                  <option value="12h">A cada 12h</option>
+                  <option value="8h">A cada 8h</option>
+                  <option value="Semanal">Semanal</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Observação"
+                  value={editMedicamento.observacao || ''}
+                  onChange={(e) => setEditMedicamento({...editMedicamento, observacao: e.target.value})}
+                />
+                <div className="modal-buttons">
+                  <button type="button" className="btn-delete" onClick={handleDeleteMedicamentoModal}>Excluir</button>
+                  <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn-save">Salvar</button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </main>

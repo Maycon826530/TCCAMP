@@ -48,11 +48,7 @@ public class AdminController {
     }
     
     @GetMapping("/usuarios")
-    public ResponseEntity<?> listarUsuarios(@RequestHeader("Authorization") String token) {
-        if (!isAdmin(token)) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Acesso negado"));
-        }
-        
+    public ResponseEntity<?> listarUsuarios() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return ResponseEntity.ok(usuarios);
     }

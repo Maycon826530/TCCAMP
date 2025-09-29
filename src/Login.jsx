@@ -51,24 +51,6 @@ function Login({ onGoToCadastro, onLogin }) {
     )
     
     if (usuarioEncontrado) {
-      // Registrar login no localStorage
-      const loginData = {
-        usuario: formData.usuario,
-        dataLogin: new Date().toISOString(),
-        isAdmin: false
-      }
-      
-      const loginsExistentes = JSON.parse(localStorage.getItem('loginsRealizados') || '[]')
-      loginsExistentes.push(loginData)
-      localStorage.setItem('loginsRealizados', JSON.stringify(loginsExistentes))
-      
-      // Atualizar último login do usuário
-      const usuarioIndex = usuarios.findIndex(u => u.nome === usuarioEncontrado.nome)
-      if (usuarioIndex !== -1) {
-        usuarios[usuarioIndex].ultimoLogin = new Date().toISOString()
-        localStorage.setItem('usuariosCadastrados', JSON.stringify(usuarios))
-      }
-      
       alert('Login realizado com sucesso! Bem-vindo de volta ao PharmaLife!')
       sessionStorage.setItem('isAdmin', 'false')
       sessionStorage.setItem('userName', formData.usuario)

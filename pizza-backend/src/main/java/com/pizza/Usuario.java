@@ -1,4 +1,4 @@
-package com.pharmalife;
+package com.pizza;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -27,6 +27,12 @@ public class Usuario {
     
     @Column
     private LocalDateTime ultimoLogin;
+    
+    @Column
+    private Integer idade;
+    
+    @Column(length = 500)
+    private String comorbidade;
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
@@ -48,4 +54,10 @@ public class Usuario {
     
     public LocalDateTime getUltimoLogin() { return ultimoLogin; }
     public void setUltimoLogin(LocalDateTime ultimoLogin) { this.ultimoLogin = ultimoLogin; }
+    
+    public Integer getIdade() { return idade; }
+    public void setIdade(Integer idade) { this.idade = idade; }
+    
+    public String getComorbidade() { return comorbidade; }
+    public void setComorbidade(String comorbidade) { this.comorbidade = comorbidade; }
 }
