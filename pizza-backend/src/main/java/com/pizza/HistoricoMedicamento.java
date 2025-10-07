@@ -6,6 +6,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "historico_medicamento")
 public class HistoricoMedicamento {
+    
+    public enum TipoAcao {
+        ADICIONADO, EDITADO, EXCLUIDO, TOMADO
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -21,10 +25,11 @@ public class HistoricoMedicamento {
     private String dosagem;
     
     @Column(nullable = false)
-    private String acao; // "ADICIONADO", "EDITADO", "EXCLUIDO", "TOMADO"
+    @Enumerated(EnumType.STRING)
+    private TipoAcao acao;
     
     @Column(columnDefinition = "TEXT")
-    private String detalhes; // Detalhes da operação
+    private String detalhes;
     
     @Column(nullable = false)
     private LocalDateTime dataHora = LocalDateTime.now();
@@ -41,8 +46,12 @@ public class HistoricoMedicamento {
     public String getDosagem() { return dosagem; }
     public void setDosagem(String dosagem) { this.dosagem = dosagem; }
     
-    public String getAcao() { return acao; }
-    public void setAcao(String acao) { this.acao = acao; }
+    public TipoAcao getAcao() { return acao; }
+    public void setAcao(TipoAcao acao) { this.acao = acao; }
+    
+    public void setAcao(String acao) {
+        this.acao = TipoAcao.valueOf(acao);
+    }
     
     public String getDetalhes() { return detalhes; }
     public void setDetalhes(String detalhes) { this.detalhes = detalhes; }

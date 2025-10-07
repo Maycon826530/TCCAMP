@@ -92,9 +92,14 @@
 .input-icon {
   position: absolute;
   left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 20px;
 }
 
 .input-group input {

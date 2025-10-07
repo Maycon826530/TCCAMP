@@ -1,0 +1,304 @@
+/* Estilos para a página de Adicionar */
+.adicionar-container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.adicionar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  color: white;
+}
+
+.header-content .page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content .page-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.header-stats {
+  display: flex;
+  gap: 2rem;
+}
+
+.stat-mini {
+  text-align: center;
+  background: rgba(255,255,255,0.1);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.stat-mini .stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.stat-mini .stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.adicionar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.add-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.add-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.medicamento-card {
+  border-left: 4px solid #48bb78;
+}
+
+.lembrete-card {
+  border-left: 4px solid #3b82f6;
+}
+
+.card-header-modern {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.card-icon-large {
+  font-size: 3rem;
+  margin-right: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 15px;
+}
+
+.card-title-section h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: #2d3748;
+}
+
+.card-title-section p {
+  color: #718096;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.form-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.input-modern, .select-modern, .textarea-modern {
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.input-modern:focus, .select-modern:focus, .textarea-modern:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.textarea-modern {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.btn-add-modern {
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.btn-add-modern.medicamento {
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  color: white;
+}
+
+.btn-add-modern.lembrete {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+}
+
+.btn-add-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+}
+
+.tips-section {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.tips-section h3 {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #2d3748;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.tip-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.tip-icon {
+  font-size: 2rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.tip-card h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.tip-card p {
+  color: #718096;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .adicionar-container {
+    padding: 1rem;
+  }
+  
+  .adicionar-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  
+  .header-stats {
+    justify-content: center;
+  }
+  
+  .adicionar-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .input-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-content .page-title {
+    font-size: 2rem;
+  }
+}
+
+/* Modo de acessibilidade */
+.accessibility-mode .adicionar-container {
+  font-size: 1.2rem;
+}
+
+.accessibility-mode .page-title {
+  font-size: 3rem !important;
+}
+
+.accessibility-mode .input-modern,
+.accessibility-mode .select-modern,
+.accessibility-mode .textarea-modern {
+  font-size: 1.3rem;
+  padding: 1.5rem;
+}
+
+.accessibility-mode .btn-add-modern {
+  font-size: 1.4rem;
+  padding: 1.5rem 2.5rem;
+}

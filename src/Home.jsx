@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './Home.css'
 import './Accessibility.css'
+import './Adicionar.css'
 import Sobre from './Sobre'
 
 function Home({ onLogout }) {
@@ -188,9 +189,10 @@ function Home({ onLogout }) {
       const response = await fetch(`http://localhost:8080/medicamentos/usuario/${usuarioId}`)
       if (response.ok) {
         const medicamentosBackend = await response.json()
-        setMedicamentos(medicamentosBackend)
+        const medicamentosArray = Array.isArray(medicamentosBackend) ? medicamentosBackend : []
+        setMedicamentos(medicamentosArray)
         // Sincronizar com localStorage
-        localStorage.setItem('medicamentos', JSON.stringify(medicamentosBackend))
+        localStorage.setItem('medicamentos', JSON.stringify(medicamentosArray))
       } else {
         throw new Error('Backend não disponível')
       }
@@ -198,7 +200,7 @@ function Home({ onLogout }) {
       console.log('Usando localStorage como fallback')
       // Fallback para localStorage
       const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
-      const medicamentosUsuario = medicamentosExistentes.filter(med => med.usuario === userName)
+      const medicamentosUsuario = Array.isArray(medicamentosExistentes) ? medicamentosExistentes.filter(med => med.usuario === userName) : []
       setMedicamentos(medicamentosUsuario)
     }
     setLoading(false)
@@ -208,11 +210,11 @@ function Home({ onLogout }) {
     carregarMedicamentos()
   }, [])
   
-  const agendaMedicamentos = medicamentos.map(med => ({
+  const agendaMedicamentos = Array.isArray(medicamentos) ? medicamentos.map(med => ({
     ...med,
     horario: med.horario,
     status: 'próximo'
-  }))
+  })) : []
 
   const historicoRemedios = [
     { nome: 'Paracetamol 750mg', data: '15/12/2024', horario: '16:00' },
@@ -265,7 +267,7 @@ function Home({ onLogout }) {
         </div>
 
         {/* Grid principal */}
-        <div className="dashboard-grid">
+        <div className="dashboard-grid" style={{alignItems: 'stretch'}}>
           {/* Próximos medicamentos */}
           <div className="dashboard-card priority-card">
             <div className="card-header-modern">
@@ -505,7 +507,8 @@ function Home({ onLogout }) {
       const response = await fetch(`http://localhost:8080/historico/usuario/${usuarioId}`)
       if (response.ok) {
         const historico = await response.json()
-        setHistoricoCompleto(historico)
+        const historicoArray = Array.isArray(historico) ? historico : []
+        setHistoricoCompleto(historicoArray)
       } else {
         throw new Error('Backend não disponível')
       }
@@ -542,10 +545,10 @@ function Home({ onLogout }) {
         }))
       
       // Combinar e ordenar todos os históricos
-      const historicoLocal = [...historicoTomados, ...historicoExcluidos]
+      const historicoLocal = [...(Array.isArray(historicoTomados) ? historicoTomados : []), ...(Array.isArray(historicoExcluidos) ? historicoExcluidos : [])]
         .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora))
       
-      setHistoricoCompleto(historicoLocal)
+      setHistoricoCompleto(Array.isArray(historicoLocal) ? historicoLocal : [])
     }
   }
   
@@ -563,6 +566,9 @@ function Home({ onLogout }) {
             idade: usuario.idade || '',
             comorbidade: usuario.comorbidade || ''
           })
+          // Atualizar sessionStorage com dados do backend
+          sessionStorage.setItem('userName', usuario.nome)
+          sessionStorage.setItem('userEmail', usuario.email)
           return
         }
       }
@@ -570,19 +576,37 @@ function Home({ onLogout }) {
       console.log('Usando dados do sessionStorage')
     }
     
-    // Fallback para sessionStorage
+    // Fallback para sessionStorage e localStorage
     const userName = sessionStorage.getItem('userName')
-    const userEmail = sessionStorage.getItem('userEmail')
+    let userEmail = sessionStorage.getItem('userEmail')
+    let userIdade = ''
+    let userComorbidade = ''
     
-    if (userName) {
-      setPerfil({
-        nome: userName,
-        senha: '******',
-        email: userEmail || '',
-        idade: '',
-        comorbidade: ''
-      })
+    // Buscar dados completos do localStorage
+    const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+    const usuarioEncontrado = usuariosCadastrados.find(u => u.nome === userName || u.email === userEmail)
+    
+    if (usuarioEncontrado) {
+      userEmail = usuarioEncontrado.email
+      userIdade = usuarioEncontrado.idade || ''
+      userComorbidade = usuarioEncontrado.comorbidade || ''
+      sessionStorage.setItem('userEmail', userEmail)
     }
+    
+    // Também verificar se há dados salvos no perfil local
+    const perfilLocal = JSON.parse(localStorage.getItem('perfilUsuario') || '{}')
+    if (perfilLocal.nome === userName) {
+      userIdade = perfilLocal.idade || userIdade
+      userComorbidade = perfilLocal.comorbidade || userComorbidade
+    }
+    
+    setPerfil({
+      nome: userName || 'Usuário',
+      senha: '******',
+      email: userEmail || 'Não informado',
+      idade: userIdade || '',
+      comorbidade: userComorbidade || ''
+    })
   }
   
   useEffect(() => {
@@ -822,122 +846,214 @@ function Home({ onLogout }) {
   }
 
   const renderAdicionar = () => (
-    <>
-      <h2 className="section-title">Adicionar</h2>
-      <div className="agenda">
-        <div className="card">
-          <div className="card-header">
-            <h3>💊 Adicionar Medicamento</h3>
-            <button 
-              className="btn-add-highlight"
-              onClick={handleAddMedicamento}
-              type="button"
-            >
-              ➕ Adicionar
-            </button>
-          </div>
-          <form onSubmit={handleAddMedicamento} className="med-form">
-            <input
-              type="text"
-              placeholder="Nome do medicamento"
-              value={novoMedicamento.nome}
-              onChange={(e) => setNovoMedicamento({...novoMedicamento, nome: e.target.value})}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Dosagem (ex: 50mg)"
-              value={novoMedicamento.dosagem}
-              onChange={(e) => setNovoMedicamento({...novoMedicamento, dosagem: e.target.value})}
-              required
-            />
-            <input
-              type="time"
-              value={novoMedicamento.horario}
-              onChange={(e) => setNovoMedicamento({...novoMedicamento, horario: e.target.value})}
-              required
-            />
-            <select
-              value={novoMedicamento.frequencia}
-              onChange={(e) => setNovoMedicamento({...novoMedicamento, frequencia: e.target.value})}
-            >
-              <option value="Diário">Diário</option>
-              <option value="12h">A cada 12h</option>
-              <option value="8h">A cada 8h</option>
-              <option value="Semanal">Semanal</option>
-            </select>
-            <select
-              value={novoMedicamento.duracao}
-              onChange={(e) => setNovoMedicamento({...novoMedicamento, duracao: e.target.value})}
-            >
-              <option value="1 dia">1 dia</option>
-              <option value="2 dias">2 dias</option>
-              <option value="3 dias">3 dias</option>
-              <option value="4 dias">4 dias</option>
-              <option value="5 dias">5 dias</option>
-              <option value="1 semana">1 semana</option>
-              <option value="2 semanas">2 semanas</option>
-              <option value="3 semanas">3 semanas</option>
-              <option value="1 mês">1 mês</option>
-              <option value="2 meses">2 meses</option>
-              <option value="3 meses">3 meses</option>
-              <option value="6 meses">6 meses</option>
-              <option value="1 ano">1 ano</option>
-              <option value="Contínuo">Contínuo</option>
-            </select>
-          </form>
-          <button 
-            onClick={handleAddMedicamento}
-            style={{display: 'block', width: '100%', minHeight: '50px', backgroundColor: '#48bb78', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', marginTop: '1rem'}}
-          >
-            Adicionar Medicamento
-          </button>
+    <div className="adicionar-container">
+      <div className="adicionar-header">
+        <div className="header-content">
+          <h1 className="page-title">✨ Adicionar Novo</h1>
+          <p className="page-subtitle">Cadastre medicamentos e lembretes para manter sua saúde em dia</p>
         </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3>📝 Adicionar Lembrete</h3>
-            <button 
-              className="btn-add-highlight"
-              onClick={handleAddLembrete}
-              type="button"
-            >
-              ➕ Adicionar
-            </button>
+        <div className="header-stats">
+          <div className="stat-mini">
+            <span className="stat-number">{medicamentos.length}</span>
+            <span className="stat-label">Medicamentos</span>
           </div>
-          <form onSubmit={handleAddLembrete} className="med-form">
-            <input
-              type="text"
-              placeholder="Título do lembrete"
-              value={novoLembrete.titulo}
-              onChange={(e) => setNovoLembrete({...novoLembrete, titulo: e.target.value})}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Descrição (opcional)"
-              value={novoLembrete.descricao}
-              onChange={(e) => setNovoLembrete({...novoLembrete, descricao: e.target.value})}
-            />
-            <input
-              type="date"
-              value={novoLembrete.data}
-              onChange={(e) => setNovoLembrete({...novoLembrete, data: e.target.value})}
-              required
-            />
-            <input
-              type="time"
-              value={novoLembrete.horario}
-              onChange={(e) => setNovoLembrete({...novoLembrete, horario: e.target.value})}
-              required
-            />
-            <button type="submit" className="btn-add" style={{display: 'block', width: '100%', minHeight: '50px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '12px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', marginTop: '1rem'}}>Adicionar Lembrete</button>
-          </form>
+          <div className="stat-mini">
+            <span className="stat-number">{lembretes.length}</span>
+            <span className="stat-label">Lembretes</span>
+          </div>
         </div>
-
-
       </div>
-    </>
+
+      <div className="adicionar-grid">
+        <div className="add-card medicamento-card">
+          <div className="card-header-modern">
+            <div className="card-icon-large">💊</div>
+            <div className="card-title-section">
+              <h3>Novo Medicamento</h3>
+              <p>Adicione um medicamento à sua agenda</p>
+            </div>
+          </div>
+          
+          <div className="form-modern">
+            <div className="input-group">
+              <label>Nome do Medicamento</label>
+              <input
+                type="text"
+                placeholder="Ex: Paracetamol, Dipirona..."
+                value={novoMedicamento.nome}
+                onChange={(e) => setNovoMedicamento({...novoMedicamento, nome: e.target.value})}
+                className="input-modern"
+                required
+              />
+            </div>
+            
+            <div className="input-row">
+              <div className="input-group">
+                <label>Dosagem</label>
+                <input
+                  type="text"
+                  placeholder="Ex: 500mg, 1 comprimido"
+                  value={novoMedicamento.dosagem}
+                  onChange={(e) => setNovoMedicamento({...novoMedicamento, dosagem: e.target.value})}
+                  className="input-modern"
+                  required
+                />
+              </div>
+              
+              <div className="input-group">
+                <label>Horário</label>
+                <input
+                  type="time"
+                  value={novoMedicamento.horario}
+                  onChange={(e) => setNovoMedicamento({...novoMedicamento, horario: e.target.value})}
+                  className="input-modern"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="input-row">
+              <div className="input-group">
+                <label>Frequência</label>
+                <select
+                  value={novoMedicamento.frequencia}
+                  onChange={(e) => setNovoMedicamento({...novoMedicamento, frequencia: e.target.value})}
+                  className="select-modern"
+                >
+                  <option value="Diário">📅 Diário</option>
+                  <option value="12h">🕐 A cada 12h</option>
+                  <option value="8h">⏰ A cada 8h</option>
+                  <option value="Semanal">📆 Semanal</option>
+                </select>
+              </div>
+              
+              <div className="input-group">
+                <label>Duração do Tratamento</label>
+                <select
+                  value={novoMedicamento.duracao}
+                  onChange={(e) => setNovoMedicamento({...novoMedicamento, duracao: e.target.value})}
+                  className="select-modern"
+                >
+                  <option value="1 dia">1 dia</option>
+                  <option value="3 dias">3 dias</option>
+                  <option value="5 dias">5 dias</option>
+                  <option value="1 semana">1 semana</option>
+                  <option value="2 semanas">2 semanas</option>
+                  <option value="1 mês">1 mês</option>
+                  <option value="3 meses">3 meses</option>
+                  <option value="6 meses">6 meses</option>
+                  <option value="Contínuo">Contínuo</option>
+                </select>
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleAddMedicamento}
+              className="btn-add-modern medicamento"
+              type="button"
+            >
+              <span className="btn-icon">💊</span>
+              Adicionar Medicamento
+            </button>
+          </div>
+        </div>
+
+        <div className="add-card lembrete-card">
+          <div className="card-header-modern">
+            <div className="card-icon-large">🔔</div>
+            <div className="card-title-section">
+              <h3>Novo Lembrete</h3>
+              <p>Crie lembretes importantes para sua saúde</p>
+            </div>
+          </div>
+          
+          <div className="form-modern">
+            <div className="input-group">
+              <label>Título do Lembrete</label>
+              <input
+                type="text"
+                placeholder="Ex: Consulta médica, Exame de sangue..."
+                value={novoLembrete.titulo}
+                onChange={(e) => setNovoLembrete({...novoLembrete, titulo: e.target.value})}
+                className="input-modern"
+                required
+              />
+            </div>
+            
+            <div className="input-group">
+              <label>Descrição (Opcional)</label>
+              <textarea
+                placeholder="Adicione detalhes sobre o lembrete..."
+                value={novoLembrete.descricao}
+                onChange={(e) => setNovoLembrete({...novoLembrete, descricao: e.target.value})}
+                className="textarea-modern"
+                rows="3"
+              />
+            </div>
+            
+            <div className="input-row">
+              <div className="input-group">
+                <label>Data</label>
+                <input
+                  type="date"
+                  value={novoLembrete.data}
+                  onChange={(e) => setNovoLembrete({...novoLembrete, data: e.target.value})}
+                  className="input-modern"
+                  required
+                />
+              </div>
+              
+              <div className="input-group">
+                <label>Horário</label>
+                <input
+                  type="time"
+                  value={novoLembrete.horario}
+                  onChange={(e) => setNovoLembrete({...novoLembrete, horario: e.target.value})}
+                  className="input-modern"
+                  required
+                />
+              </div>
+            </div>
+            
+            <button 
+              onClick={handleAddLembrete}
+              className="btn-add-modern lembrete"
+              type="button"
+            >
+              <span className="btn-icon">🔔</span>
+              Adicionar Lembrete
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="tips-section">
+        <h3>💡 Dicas Importantes</h3>
+        <div className="tips-grid">
+          <div className="tip-card">
+            <span className="tip-icon">⏰</span>
+            <div>
+              <h4>Horários Regulares</h4>
+              <p>Mantenha sempre os mesmos horários para melhor eficácia</p>
+            </div>
+          </div>
+          <div className="tip-card">
+            <span className="tip-icon">📋</span>
+            <div>
+              <h4>Informações Completas</h4>
+              <p>Preencha todos os campos para um controle mais preciso</p>
+            </div>
+          </div>
+          <div className="tip-card">
+            <span className="tip-icon">👨‍⚕️</span>
+            <div>
+              <h4>Orientação Médica</h4>
+              <p>Sempre siga as orientações do seu médico</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 
   const renderHistorico = () => {
@@ -965,13 +1081,13 @@ function Home({ onLogout }) {
       <>
         <h2 className="section-title">Histórico de Medicamentos</h2>
         <div className="historico">
-          {historicoCompleto.length === 0 ? (
+          {!Array.isArray(historicoCompleto) || historicoCompleto.length === 0 ? (
             <div className="card" style={{textAlign: 'center', padding: '40px', color: '#666'}}>
               <h3>📋 Nenhum histórico ainda</h3>
               <p>Quando você adicionar, editar, excluir ou tomar medicamentos, o histórico aparecerá aqui.</p>
             </div>
           ) : (
-            historicoCompleto.map((item, index) => {
+            (Array.isArray(historicoCompleto) ? historicoCompleto : []).map((item, index) => {
               const dataHora = new Date(item.dataHora)
               const hoje = new Date()
               const ontem = new Date(hoje)
@@ -1025,7 +1141,7 @@ function Home({ onLogout }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nome: perfil.nome,
-          senha: perfil.senha,
+          senha: perfil.senha === '******' ? undefined : perfil.senha,
           email: perfil.email,
           idade: perfil.idade,
           comorbidade: perfil.comorbidade
@@ -1035,6 +1151,15 @@ function Home({ onLogout }) {
       if (response.ok) {
         sessionStorage.setItem('userName', perfil.nome)
         sessionStorage.setItem('userEmail', perfil.email)
+        
+        // Salvar no localStorage como backup
+        localStorage.setItem('perfilUsuario', JSON.stringify({
+          nome: perfil.nome,
+          email: perfil.email,
+          idade: perfil.idade,
+          comorbidade: perfil.comorbidade
+        }))
+        
         showToastMessage('✅ Perfil atualizado com sucesso!')
         setShowProfileModal(false)
       } else {
@@ -1044,6 +1169,29 @@ function Home({ onLogout }) {
       // Fallback para localStorage
       sessionStorage.setItem('userName', perfil.nome)
       sessionStorage.setItem('userEmail', perfil.email)
+      
+      // Salvar todos os dados no localStorage
+      localStorage.setItem('perfilUsuario', JSON.stringify({
+        nome: perfil.nome,
+        email: perfil.email,
+        idade: perfil.idade,
+        comorbidade: perfil.comorbidade
+      }))
+      
+      // Atualizar também o array de usuários cadastrados
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+      const index = usuariosCadastrados.findIndex(u => u.nome === perfil.nome || u.email === perfil.email)
+      if (index !== -1) {
+        usuariosCadastrados[index] = {
+          ...usuariosCadastrados[index],
+          nome: perfil.nome,
+          email: perfil.email,
+          idade: perfil.idade,
+          comorbidade: perfil.comorbidade
+        }
+        localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados))
+      }
+      
       showToastMessage('✅ Perfil atualizado com sucesso!')
       setShowProfileModal(false)
     }
@@ -1083,7 +1231,6 @@ function Home({ onLogout }) {
 
         </div>
         <div className="card">
-
           <h4>Perfil</h4>
           <div className="perfil-info">
             <div className="item">
@@ -1107,10 +1254,8 @@ function Home({ onLogout }) {
               <span>******</span>
             </div>
           </div>
-          <div style={{textAlign: 'center'}}>
-            <button className="btn-config" onClick={() => setShowProfileModal(true)}>Editar Perfil</button>
-            <button className="btn-config" onClick={onLogout}>Sair da Conta</button>
-          </div>
+          
+
         </div>
       </div>
       
@@ -1500,13 +1645,30 @@ function Home({ onLogout }) {
             <div className="logo-icon">💊</div>
             <h1>PharmaLife</h1>
           </div>
-          <button 
-            className="accessibility-toggle"
-            onClick={toggleAccessibilityMode}
-            title={accessibilityMode ? 'Desativar modo de acessibilidade' : 'Ativar modo de acessibilidade - Letras maiores'}
-          >
-            {accessibilityMode ? '🔍 Normal' : '🔍 Grande'}
-          </button>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>
+            <button 
+              className="accessibility-toggle"
+              onClick={toggleAccessibilityMode}
+              title={accessibilityMode ? 'Desativar modo de acessibilidade' : 'Ativar modo de acessibilidade - Letras maiores'}
+            >
+              {accessibilityMode ? '🔍 Normal' : '🔍 Grande'}
+            </button>
+            <button 
+              onClick={onLogout}
+              style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                color: 'white',
+                border: '2px solid rgba(239, 68, 68, 0.3)',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}
+            >
+              🚪 Sair
+            </button>
+          </div>
         </div>
         <nav className="nav-buttons">
           <button 

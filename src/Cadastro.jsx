@@ -22,7 +22,7 @@ function Cadastro({ onGoToLogin, onLogin }) {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (formData.senha !== formData.confirmarSenha) {
@@ -30,37 +30,35 @@ function Cadastro({ onGoToLogin, onLogin }) {
       return
     }
     
-    // Verificar se usuário já existe
-    const usuariosExistentes = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
-    const nomeExiste = usuariosExistentes.find(u => u.nome.toLowerCase() === formData.nome.toLowerCase())
-    const emailExiste = usuariosExistentes.find(u => u.email.toLowerCase() === formData.email.toLowerCase())
-    
-    if (nomeExiste) {
-      alert('Nome de usuário já cadastrado!')
-      return
+    try {
+      const response = await fetch('http://localhost:8080/auth/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: formData.nome,
+          email: formData.email,
+          senha: formData.senha,
+          idade: parseInt(formData.idade) || null,
+          comorbidade: formData.comorbidade || null
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        alert('Conta criada com sucesso! Bem-vindo ao PharmaLife!')
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('usuario', JSON.stringify(data.usuario))
+        onLogin(data.usuario)
+      } else {
+        alert(data.erro || 'Erro ao criar conta')
+      }
+    } catch (error) {
+      console.error('Erro:', error)
+      alert('Erro de conexão. Verifique se o servidor está rodando.')
     }
-    
-    if (emailExiste) {
-      alert('Email já cadastrado!')
-      return
-    }
-    
-    // Salvar usuário no localStorage
-    const novoUsuario = {
-      nome: formData.nome,
-      email: formData.email,
-      senha: formData.senha,
-      idade: formData.idade,
-      comorbidade: formData.comorbidade,
-      dataCadastro: new Date().toISOString(),
-      ultimoLogin: null
-    }
-    
-    usuariosExistentes.push(novoUsuario)
-    localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosExistentes))
-    
-    alert('Conta criada com sucesso! Bem-vindo ao PharmaLife!')
-    onLogin(formData)
     
     setFormData({
       nome: '',

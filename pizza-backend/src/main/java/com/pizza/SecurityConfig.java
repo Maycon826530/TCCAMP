@@ -22,14 +22,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/produtos/**").permitAll()
-                .requestMatchers("/vendas/**").permitAll()
-                .requestMatchers("/lembretes/**").permitAll()
-                .requestMatchers("/test/**").permitAll()
-                .anyRequest().authenticated()
-            );
+            .authorizeHttpRequests(auth -> {
+                auth.requestMatchers("/auth/**").permitAll();
+                auth.requestMatchers("/produtos/**").permitAll();
+                auth.requestMatchers("/vendas/**").permitAll();
+                auth.requestMatchers("/lembretes/**").permitAll();
+                auth.requestMatchers("/test/**").permitAll();
+                auth.anyRequest().authenticated();
+            });
         return http.build();
     }
 }

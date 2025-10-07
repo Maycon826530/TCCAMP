@@ -25,17 +25,21 @@ public class AuthController {
     
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
+        String emailOrNome = request.get("email");
         String senha = request.get("senha");
         
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(emailOrNome);
+        if (!usuario.isPresent()) {
+            usuario = usuarioRepository.findByNome(emailOrNome);
+        }
+        
         if (usuario.isPresent() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
             // Atualizar último login
             Usuario user = usuario.get();
             user.setUltimoLogin(LocalDateTime.now());
             usuarioRepository.save(user);
             
-            String token = jwtUtil.generateToken(email);
+            String token = jwtUtil.generateToken(user.getEmail());
             return ResponseEntity.ok(Map.of("token", token, "usuario", user, "isAdmin", user.getIsAdmin()));
         }
         return ResponseEntity.badRequest().body(Map.of("erro", "Credenciais inválidas"));
@@ -68,16 +72,20 @@ public class AuthController {
     
     @PostMapping("/admin/login")
     public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
+        String emailOrNome = request.get("email");
         String senha = request.get("senha");
         
-        Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
+        Optional<Usuario> usuario = usuarioRepository.findByEmail(emailOrNome);
+        if (!usuario.isPresent()) {
+            usuario = usuarioRepository.findByNome(emailOrNome);
+        }
+        
         if (usuario.isPresent() && usuario.get().getIsAdmin() && passwordEncoder.matches(senha, usuario.get().getSenha())) {
             Usuario user = usuario.get();
             user.setUltimoLogin(LocalDateTime.now());
             usuarioRepository.save(user);
             
-            String token = jwtUtil.generateToken(email);
+            String token = jwtUtil.generateToken(user.getEmail());
             return ResponseEntity.ok(Map.of("token", token, "usuario", user, "isAdmin", true));
         }
         return ResponseEntity.badRequest().body(Map.of("erro", "Acesso negado - Apenas administradores"));
@@ -86,7 +94,7 @@ public class AuthController {
     @GetMapping("/admin/usuarios")
     public ResponseEntity<?> listarUsuarios(@RequestHeader("Authorization") String token) {
         try {
-            String email = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+            String email = jwtUtil.getEmailFromToken(token.replace("Bearer ", ""));
             Optional<Usuario> admin = usuarioRepository.findByEmail(email);
             
             if (!admin.isPresent() || !admin.get().getIsAdmin()) {
@@ -103,7 +111,7 @@ public class AuthController {
     @GetMapping("/admin/estatisticas")
     public ResponseEntity<?> obterEstatisticas(@RequestHeader("Authorization") String token) {
         try {
-            String email = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+            String email = jwtUtil.getEmailFromToken(token.replace("Bearer ", ""));
             Optional<Usuario> admin = usuarioRepository.findByEmail(email);
             
             if (!admin.isPresent() || !admin.get().getIsAdmin()) {

@@ -19,44 +19,41 @@ function Login({ onGoToCadastro, onLogin }) {
     document.title = 'PharmaLife - Login'
   }, [])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
-    // Contas de administrador pré-definidas
-    const admins = {
-      'mayconmoreira': 'rm94602',
-      'felipeprestes': 'rm94325', 
-      'adrielfelipe': 'rm94608',
-      'murilokffiner': 'rm94705'
-    }
-    
-    // Verificar se é login de admin
-    if (isAdminLogin) {
-      if (admins[formData.usuario] && admins[formData.usuario] === formData.senha) {
-        alert('Login de administrador realizado com sucesso!')
-        sessionStorage.setItem('isAdmin', 'true')
-        sessionStorage.setItem('userName', formData.usuario)
-        onLogin()
-        return
+    try {
+      const endpoint = isAdminLogin ? '/auth/admin/login' : '/auth/login'
+      
+      const response = await fetch(`http://localhost:8080${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.usuario,
+          senha: formData.senha
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok) {
+        const loginType = isAdminLogin ? 'administrador' : 'usuário'
+        alert(`Login de ${loginType} realizado com sucesso!`)
+        
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('usuario', JSON.stringify(data.usuario))
+        sessionStorage.setItem('isAdmin', data.isAdmin ? 'true' : 'false')
+        sessionStorage.setItem('userName', data.usuario.nome)
+        
+        onLogin(data.usuario)
       } else {
-        alert('Credenciais de administrador inválidas!')
-        return
+        alert(data.erro || 'Credenciais inválidas!')
       }
-    }
-    
-    // Verificar login de usuário comum
-    const usuarios = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
-    const usuarioEncontrado = usuarios.find(u => 
-      (u.nome === formData.usuario || u.email === formData.usuario) && u.senha === formData.senha
-    )
-    
-    if (usuarioEncontrado) {
-      alert('Login realizado com sucesso! Bem-vindo de volta ao PharmaLife!')
-      sessionStorage.setItem('isAdmin', 'false')
-      sessionStorage.setItem('userName', formData.usuario)
-      onLogin()
-    } else {
-      alert('Usuário ou senha incorretos!')
+    } catch (error) {
+      console.error('Erro:', error)
+      alert('Erro de conexão. Verifique se o servidor está rodando.')
     }
   }
 
@@ -67,14 +64,14 @@ function Login({ onGoToCadastro, onLogin }) {
           <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
             <rect x="20" y="30" width="60" height="50" rx="3" fill="#3b82f6" opacity="0.9"/>
             <rect x="25" y="25" width="50" height="40" rx="2" fill="#60a5fa" opacity="0.7"/>
-            <path d="M45 35 L55 35 M50 30 L50 40" stroke="white" stroke-width="3" stroke-linecap="round"/>
+            <path d="M45 35 L55 35 M50 30 L50 40" stroke="white" strokeWidth="3" strokeLinecap="round"/>
             <rect x="30" y="65" width="8" height="15" fill="#1e40af"/>
             <rect x="62" y="65" width="8" height="15" fill="#1e40af"/>
             <rect x="35" y="45" width="6" height="4" fill="white" opacity="0.8"/>
             <rect x="59" y="45" width="6" height="4" fill="white" opacity="0.8"/>
             <rect x="35" y="52" width="6" height="4" fill="white" opacity="0.8"/>
             <rect x="59" y="52" width="6" height="4" fill="white" opacity="0.8"/>
-            <path d="M20 30 L50 15 L80 30" stroke="#1e40af" stroke-width="2" fill="none"/>
+            <path d="M20 30 L50 15 L80 30" stroke="#1e40af" strokeWidth="2" fill="none"/>
           </svg>
         </div>
         

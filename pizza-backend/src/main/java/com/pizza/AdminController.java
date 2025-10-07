@@ -1,4 +1,4 @@
-package com.pharmalife;
+package com.pizza;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class AdminController {
     
     private boolean isAdmin(String token) {
         try {
-            String email = jwtUtil.extractUsername(token.replace("Bearer ", ""));
+            String email = jwtUtil.getEmailFromToken(token.replace("Bearer ", ""));
             Optional<Usuario> usuario = usuarioRepository.findByEmail(email);
             return usuario.isPresent() && usuario.get().getIsAdmin();
         } catch (Exception e) {
@@ -48,9 +48,17 @@ public class AdminController {
     }
     
     @GetMapping("/usuarios")
-    public ResponseEntity<?> listarUsuarios() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return ResponseEntity.ok(usuarios);
+    public ResponseEntity<?> listarUsuarios(@RequestHeader("Authorization") String token) {
+        if (!isAdmin(token)) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Acesso negado"));
+        }
+        
+        try {
+            List<Usuario> usuarios = usuarioRepository.findAll();
+            return ResponseEntity.ok(usuarios);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Erro ao buscar usuários"));
+        }
     }
     
     @PutMapping("/usuario/{id}/admin")
@@ -59,16 +67,24 @@ public class AdminController {
             return ResponseEntity.badRequest().body(Map.of("erro", "Acesso negado"));
         }
         
-        Optional<Usuario> usuario = usuarioRepository.findById(id);
-        if (!usuario.isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+        if (id == null || id <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "ID de usuário inválido"));
         }
         
-        Usuario user = usuario.get();
-        user.setIsAdmin(!user.getIsAdmin());
-        usuarioRepository.save(user);
-        
-        return ResponseEntity.ok(Map.of("mensagem", "Status de admin atualizado", "usuario", user));
+        try {
+            Optional<Usuario> usuario = usuarioRepository.findById(id);
+            if (!usuario.isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+            }
+            
+            Usuario user = usuario.get();
+            user.setIsAdmin(!user.getIsAdmin());
+            usuarioRepository.save(user);
+            
+            return ResponseEntity.ok(Map.of("mensagem", "Status de admin atualizado", "usuario", user));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Erro ao atualizar usuário"));
+        }
     }
     
     @DeleteMapping("/usuario/{id}")
@@ -77,11 +93,19 @@ public class AdminController {
             return ResponseEntity.badRequest().body(Map.of("erro", "Acesso negado"));
         }
         
-        if (!usuarioRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+        if (id == null || id <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "ID de usuário inválido"));
         }
         
-        usuarioRepository.deleteById(id);
-        return ResponseEntity.ok(Map.of("mensagem", "Usuário deletado com sucesso"));
+        try {
+            if (!usuarioRepository.existsById(id)) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+            }
+            
+            usuarioRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Usuário deletado com sucesso"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Erro ao deletar usuário"));
+        }
     }
 }

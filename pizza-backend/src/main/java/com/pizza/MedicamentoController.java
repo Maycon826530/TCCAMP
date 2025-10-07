@@ -25,6 +25,10 @@ public class MedicamentoController {
     @Autowired
     private HistoricoRepository historicoRepository;
     
+
+    
+
+    
     @PostMapping("/marcar-tomado")
     public ResponseEntity<?> marcarComoTomado(@RequestBody Map<String, Object> request) {
         Integer medicamentoId = (Integer) request.get("medicamentoId");
@@ -44,8 +48,8 @@ public class MedicamentoController {
         historico.setUsuario(usuario.get());
         historico.setNomeMedicamento(med.getNome());
         historico.setDosagem(med.getDosagem());
-        historico.setAcao("TOMADO");
-        historico.setDetalhes(String.format("Medicamento %s %s foi tomado", med.getNome(), med.getDosagem()));
+        historico.setAcao(HistoricoMedicamento.TipoAcao.TOMADO);
+        historico.setDetalhes("Medicamento tomado");
         historicoRepository.save(historico);
         
         return ResponseEntity.ok(Map.of("mensagem", "Medicamento marcado como tomado"));
@@ -81,10 +85,8 @@ public class MedicamentoController {
         historico.setUsuario(usuario.get());
         historico.setNomeMedicamento(novoMedicamento.getNome());
         historico.setDosagem(novoMedicamento.getDosagem());
-        historico.setAcao("ADICIONADO");
-        historico.setDetalhes(String.format("Medicamento %s %s adicionado - Horário: %s, Frequência: %s", 
-            novoMedicamento.getNome(), novoMedicamento.getDosagem(), 
-            novoMedicamento.getHorario(), novoMedicamento.getFrequencia()));
+        historico.setAcao(HistoricoMedicamento.TipoAcao.ADICIONADO);
+        historico.setDetalhes("Medicamento adicionado");
         historicoRepository.save(historico);
         
         return ResponseEntity.ok(novoMedicamento);
@@ -114,27 +116,12 @@ public class MedicamentoController {
         
         Medicamento medicamentoAtualizado = medicamentoRepository.save(med);
         
-        // Registrar no histórico
-        StringBuilder detalhes = new StringBuilder("Medicamento modificado: ");
-        if (!nomeAntigo.equals(med.getNome())) {
-            detalhes.append(String.format("Nome: %s → %s; ", nomeAntigo, med.getNome()));
-        }
-        if (!dosagemAntiga.equals(med.getDosagem())) {
-            detalhes.append(String.format("Dosagem: %s → %s; ", dosagemAntiga, med.getDosagem()));
-        }
-        if (!horarioAntigo.equals(med.getHorario())) {
-            detalhes.append(String.format("Horário: %s → %s; ", horarioAntigo, med.getHorario()));
-        }
-        if (!frequenciaAntiga.equals(med.getFrequencia())) {
-            detalhes.append(String.format("Frequência: %s → %s; ", frequenciaAntiga, med.getFrequencia()));
-        }
-        
         HistoricoMedicamento historico = new HistoricoMedicamento();
         historico.setUsuario(med.getUsuario());
         historico.setNomeMedicamento(med.getNome());
         historico.setDosagem(med.getDosagem());
-        historico.setAcao("EDITADO");
-        historico.setDetalhes(detalhes.toString());
+        historico.setAcao(HistoricoMedicamento.TipoAcao.EDITADO);
+        historico.setDetalhes("Medicamento editado");
         historicoRepository.save(historico);
         
         return ResponseEntity.ok(medicamentoAtualizado);
@@ -155,19 +142,17 @@ public class MedicamentoController {
             historico.setUsuario(med.getUsuario());
             historico.setNomeMedicamento(med.getNome());
             historico.setDosagem(med.getDosagem());
-            historico.setAcao("EXCLUIDO");
-            historico.setDetalhes(String.format("Medicamento %s %s foi excluído", med.getNome(), med.getDosagem()));
+            historico.setAcao(HistoricoMedicamento.TipoAcao.EXCLUIDO);
+            historico.setDetalhes("Medicamento excluído");
             
-            System.out.println("Salvando histórico de exclusão: " + med.getNome());
+            // Registrar no histórico antes de deletar
             HistoricoMedicamento historicoSalvo = historicoRepository.save(historico);
-            System.out.println("Histórico salvo com ID: " + historicoSalvo.getId());
             
             // Primeiro deletar registros relacionados de medicamentos tomados
             medicamentoTomadoRepository.deleteByMedicamentoId(id);
             
             // Depois deletar o medicamento
             medicamentoRepository.deleteById(id);
-            System.out.println("Medicamento deletado: " + id);
             
             return ResponseEntity.ok(Map.of("mensagem", "Medicamento deletado com sucesso"));
         } catch (Exception e) {

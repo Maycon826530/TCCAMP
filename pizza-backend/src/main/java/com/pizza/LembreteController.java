@@ -27,30 +27,53 @@ public class LembreteController {
     
     @PostMapping
     public ResponseEntity<?> criarLembrete(@RequestBody Map<String, Object> request) {
-        Integer usuarioId = (Integer) request.get("usuarioId");
-        Optional<Usuario> usuario = usuarioRepository.findById(usuarioId);
+        try {
+            Integer usuarioId = (Integer) request.get("usuarioId");
+            if (usuarioId == null || usuarioId <= 0) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "ID de usuário inválido"));
+            }
+            
+            Optional<Usuario> usuario = usuarioRepository.findById(usuarioId);
+            if (!usuario.isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+            }
         
-        if (!usuario.isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Usuário não encontrado"));
+            String titulo = (String) request.get("titulo");
+            String data = (String) request.get("data");
+            String horario = (String) request.get("horario");
+            
+            if (titulo == null || titulo.trim().isEmpty() || data == null || horario == null) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Dados obrigatórios não informados"));
+            }
+            
+            Lembrete lembrete = new Lembrete();
+            lembrete.setTitulo(titulo.trim());
+            lembrete.setDescricao((String) request.get("descricao"));
+            lembrete.setData(LocalDate.parse(data));
+            lembrete.setHorario(LocalTime.parse(horario));
+            lembrete.setUsuario(usuario.get());
+            
+            Lembrete novoLembrete = lembreteRepository.save(lembrete);
+            return ResponseEntity.ok(novoLembrete);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Erro ao criar lembrete"));
         }
-        
-        Lembrete lembrete = new Lembrete();
-        lembrete.setTitulo((String) request.get("titulo"));
-        lembrete.setDescricao((String) request.get("descricao"));
-        lembrete.setData(LocalDate.parse((String) request.get("data")));
-        lembrete.setHorario(LocalTime.parse((String) request.get("horario")));
-        lembrete.setUsuario(usuario.get());
-        
-        Lembrete novoLembrete = lembreteRepository.save(lembrete);
-        return ResponseEntity.ok(novoLembrete);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarLembrete(@PathVariable Integer id) {
-        if (!lembreteRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body(Map.of("erro", "Lembrete não encontrado"));
+        if (id == null || id <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "ID inválido"));
         }
-        lembreteRepository.deleteById(id);
-        return ResponseEntity.ok(Map.of("mensagem", "Lembrete deletado"));
+        
+        try {
+            if (!lembreteRepository.existsById(id)) {
+                return ResponseEntity.badRequest().body(Map.of("erro", "Lembrete não encontrado"));
+            }
+            lembreteRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Lembrete deletado"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("erro", "Erro ao deletar lembrete"));
+        }
     }
 }
