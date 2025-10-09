@@ -31,7 +31,7 @@ function Cadastro({ onGoToLogin, onLogin }) {
     }
     
     try {
-      const response = await fetch('http://localhost:8080/auth/registro', {
+      const response = await fetch('http://localhost:8080/api/cadastros', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,9 +49,11 @@ function Cadastro({ onGoToLogin, onLogin }) {
       
       if (response.ok) {
         alert('Conta criada com sucesso! Bem-vindo ao PharmaLife!')
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('usuario', JSON.stringify(data.usuario))
-        onLogin(data.usuario)
+       
+        console.log(data);  // Aqui você tem o objeto retornado pela API
+       // localStorage.setItem('token', data.token)
+       localStorage.setItem('usuario', JSON.stringify(data));
+        onLogin(data)
       } else {
         alert(data.erro || 'Erro ao criar conta')
       }

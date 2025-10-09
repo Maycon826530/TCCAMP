@@ -44,6 +44,12 @@ function Home({ onLogout }) {
     frequencia: 'Diário',
     observacao: ''
   })
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false)
+  const [editProfile, setEditProfile] = useState({
+    nome: '',
+    senhaAtual: '',
+    novaSenha: ''
+  })
   const [novoLembrete, setNovoLembrete] = useState({
     titulo: '',
     descricao: '',
@@ -1197,6 +1203,66 @@ function Home({ onLogout }) {
     }
   }
 
+  const handleSaveProfileEdit = async (e) => {
+    e.preventDefault()
+    
+    if (!editProfile.nome || !editProfile.senhaAtual || !editProfile.novaSenha) {
+      showToastMessage('⚠️ Preencha todos os campos!')
+      return
+    }
+    
+    try {
+      const userId = sessionStorage.getItem('userId')
+      const response = await fetch(`http://localhost:8080/usuarios/atualizar-senha-nome`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          nome: editProfile.nome,
+          senhaAtual: editProfile.senhaAtual,
+          novaSenha: editProfile.novaSenha
+        })
+      })
+      
+      if (response.ok) {
+        sessionStorage.setItem('userName', editProfile.nome)
+        setPerfil({...perfil, nome: editProfile.nome})
+        showToastMessage('✅ Nome e senha atualizados com sucesso!')
+        setShowEditProfileModal(false)
+        setEditProfile({ nome: '', senhaAtual: '', novaSenha: '' })
+      } else {
+        const errorData = await response.json()
+        showToastMessage(errorData.erro || 'Senha atual incorreta')
+      }
+    } catch (error) {
+      // Fallback para localStorage
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+      const currentUser = sessionStorage.getItem('userName')
+      const userIndex = usuariosCadastrados.findIndex(u => u.nome === currentUser)
+      
+      if (userIndex !== -1) {
+        const user = usuariosCadastrados[userIndex]
+        if (user.senha === editProfile.senhaAtual) {
+          usuariosCadastrados[userIndex] = {
+            ...user,
+            nome: editProfile.nome,
+            senha: editProfile.novaSenha
+          }
+          localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados))
+          sessionStorage.setItem('userName', editProfile.nome)
+          setPerfil({...perfil, nome: editProfile.nome})
+          showToastMessage('✅ Nome e senha atualizados com sucesso!')
+          setShowEditProfileModal(false)
+          setEditProfile({ nome: '', senhaAtual: '', novaSenha: '' })
+        } else {
+          showToastMessage('⚠️ Senha atual incorreta!')
+        }
+      } else {
+        showToastMessage('⚠️ Usuário não encontrado!')
+      }
+    }
+  }
+
   const renderConfiguracoes = () => (
     <>
       <h2 className="section-title">Configurações</h2>
@@ -1254,6 +1320,30 @@ function Home({ onLogout }) {
               <span>******</span>
             </div>
           </div>
+          <button 
+            onClick={() => {
+              setEditProfile({
+                nome: perfil.nome,
+                senhaAtual: '',
+                novaSenha: ''
+              })
+              setShowEditProfileModal(true)
+            }}
+            style={{
+              width: '100%',
+              marginTop: '15px',
+              padding: '12px 20px',
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600'
+            }}
+          >
+            ✏️ Editar Senha e Nome
+          </button>
           
 
         </div>
@@ -1342,13 +1432,48 @@ function Home({ onLogout }) {
               <input
                 type="text"
                 placeholder="Observação"
-                value={editMedicamento.observacao}
+                value={editMedicamento.observacao || ''}
                 onChange={(e) => setEditMedicamento({...editMedicamento, observacao: e.target.value})}
               />
               <div className="modal-buttons">
                 <button type="button" className="btn-delete" onClick={handleDeleteMedicamentoModal}>Excluir</button>
                 <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
                 <button type="submit" className="btn-save">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {showEditProfileModal && (
+        <div className="modal-overlay" onClick={() => setShowEditProfileModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <h3>✏️ Editar Senha e Nome</h3>
+            <form onSubmit={handleSaveProfileEdit} className="profile-form">
+              <input
+                type="text"
+                placeholder="Novo nome"
+                value={editProfile.nome}
+                onChange={(e) => setEditProfile({...editProfile, nome: e.target.value})}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Senha atual"
+                value={editProfile.senhaAtual}
+                onChange={(e) => setEditProfile({...editProfile, senhaAtual: e.target.value})}
+                required
+              />
+              <input
+                type="password"
+                placeholder="Nova senha"
+                value={editProfile.novaSenha}
+                onChange={(e) => setEditProfile({...editProfile, novaSenha: e.target.value})}
+                required
+              />
+              <div className="modal-buttons">
+                <button type="button" className="btn-cancel" onClick={() => setShowEditProfileModal(false)}>Cancelar</button>
+                <button type="submit" className="btn-save">Atualizar</button>
               </div>
             </form>
           </div>
@@ -1654,6 +1779,28 @@ function Home({ onLogout }) {
               {accessibilityMode ? '🔍 Normal' : '🔍 Grande'}
             </button>
             <button 
+              onClick={() => {
+                setEditProfile({
+                  nome: perfil.nome,
+                  senhaAtual: '',
+                  novaSenha: ''
+                })
+                setShowEditProfileModal(true)
+              }}
+              style={{
+                background: 'rgba(59, 130, 246, 0.2)',
+                color: 'white',
+                border: '2px solid rgba(59, 130, 246, 0.3)',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}
+            >
+              ✏️ Editar
+            </button>
+            <button 
               onClick={onLogout}
               style={{
                 background: 'rgba(239, 68, 68, 0.2)',
@@ -1777,6 +1924,41 @@ function Home({ onLogout }) {
                   <button type="button" className="btn-delete" onClick={handleDeleteMedicamentoModal}>Excluir</button>
                   <button type="button" className="btn-cancel" onClick={() => setShowEditModal(false)}>Cancelar</button>
                   <button type="submit" className="btn-save">Salvar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        
+        {showEditProfileModal && (
+          <div className="modal-overlay" onClick={() => setShowEditProfileModal(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h3>✏️ Editar Senha e Nome</h3>
+              <form onSubmit={handleSaveProfileEdit} className="profile-form">
+                <input
+                  type="text"
+                  placeholder="Novo nome"
+                  value={editProfile.nome}
+                  onChange={(e) => setEditProfile({...editProfile, nome: e.target.value})}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Senha atual"
+                  value={editProfile.senhaAtual}
+                  onChange={(e) => setEditProfile({...editProfile, senhaAtual: e.target.value})}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Nova senha"
+                  value={editProfile.novaSenha}
+                  onChange={(e) => setEditProfile({...editProfile, novaSenha: e.target.value})}
+                  required
+                />
+                <div className="modal-buttons">
+                  <button type="button" className="btn-cancel" onClick={() => setShowEditProfileModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn-save">Atualizar</button>
                 </div>
               </form>
             </div>
