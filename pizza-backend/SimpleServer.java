@@ -81,6 +81,9 @@ public class SimpleServer {
             } else if (requestLine.contains("POST /auth/registro")) {
                 String response = registrarUsuario(body);
                 out.println(response);
+            } else if (requestLine.contains("PUT /usuarios/atualizar-senha-nome")) {
+                String response = atualizarSenhaNome(body);
+                out.println(response);
             } else if (requestLine.contains("POST /medicamentos")) {
                 out.println("{\"id\": 1, \"nome\": \"Medicamento\", \"dosagem\": \"50mg\", \"horario\": \"08:00\", \"frequencia\": \"Diario\"}");
             } else if (requestLine.contains("GET /medicamentos/usuario/")) {
@@ -183,6 +186,49 @@ public class SimpleServer {
     }
     
 
+    
+    private static String atualizarSenhaNome(String body) {
+        try {
+            String userId = extrairCampo(body, "userId");
+            String nome = extrairCampo(body, "nome");
+            String senhaAtual = extrairCampo(body, "senhaAtual");
+            String novaSenha = extrairCampo(body, "novaSenha");
+            
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            
+            // Verificar senha atual
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT senha FROM usuario WHERE id = ?");
+            checkStmt.setInt(1, Integer.parseInt(userId));
+            ResultSet rs = checkStmt.executeQuery();
+            
+            if (!rs.next()) {
+                conn.close();
+                return "{\"erro\": \"Usuário não encontrado\"}";
+            }
+            
+            String senhaDb = rs.getString("senha");
+            if (!senhaDb.equals(hashSenha(senhaAtual))) {
+                conn.close();
+                return "{\"erro\": \"Senha atual incorreta\"}";
+            }
+            
+            // Atualizar nome e senha
+            PreparedStatement updateStmt = conn.prepareStatement(
+                "UPDATE usuario SET nome = ?, senha = ? WHERE id = ?"
+            );
+            updateStmt.setString(1, nome);
+            updateStmt.setString(2, hashSenha(novaSenha));
+            updateStmt.setInt(3, Integer.parseInt(userId));
+            
+            updateStmt.executeUpdate();
+            conn.close();
+            
+            return "{\"sucesso\": true, \"message\": \"Nome e senha atualizados com sucesso\"}";
+            
+        } catch (Exception e) {
+            return "{\"erro\": \"Erro interno do servidor\"}";
+        }
+    }
     
     private static String hashSenha(String senha) {
         try {

@@ -562,7 +562,7 @@ function Home({ onLogout }) {
     try {
       const userId = sessionStorage.getItem('userId')
       if (userId) {
-        const response = await fetch(`http://localhost:8080/usuarios/${userId}`)
+        const response = await fetch(`http://localhost:8080/cadastros/${userId}`)
         if (response.ok) {
           const usuario = await response.json()
           setPerfil({
@@ -1203,6 +1203,14 @@ function Home({ onLogout }) {
     }
   }
 
+  const hashSenha = async (senha) => {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(senha)
+    const hash = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hash))
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  }
+
   const handleSaveProfileEdit = async (e) => {
     e.preventDefault()
     
@@ -1213,7 +1221,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch(`http://localhost:8080/usuarios/atualizar-senha-nome`, {
+      const response = await fetch(`http://localhost:8080/api/cadastros/${userId}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1242,11 +1250,14 @@ function Home({ onLogout }) {
       
       if (userIndex !== -1) {
         const user = usuariosCadastrados[userIndex]
-        if (user.senha === editProfile.senhaAtual) {
+        const senhaAtualHash = await hashSenha(editProfile.senhaAtual)
+        const novaSenhaHash = await hashSenha(editProfile.novaSenha)
+        
+        if (user.senha === senhaAtualHash || user.senha === editProfile.senhaAtual) {
           usuariosCadastrados[userIndex] = {
             ...user,
             nome: editProfile.nome,
-            senha: editProfile.novaSenha
+            senha: novaSenhaHash
           }
           localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados))
           sessionStorage.setItem('userName', editProfile.nome)
