@@ -84,6 +84,9 @@ public class SimpleServer {
             } else if (requestLine.contains("PUT /usuarios/atualizar-senha-nome")) {
                 String response = atualizarSenhaNome(body);
                 out.println(response);
+            } else if (requestLine.contains("DELETE /usuarios/excluir-conta")) {
+                String response = excluirConta(body);
+                out.println(response);
             } else if (requestLine.contains("POST /medicamentos")) {
                 out.println("{\"id\": 1, \"nome\": \"Medicamento\", \"dosagem\": \"50mg\", \"horario\": \"08:00\", \"frequencia\": \"Diario\"}");
             } else if (requestLine.contains("GET /medicamentos/usuario/")) {
@@ -224,6 +227,52 @@ public class SimpleServer {
             conn.close();
             
             return "{\"sucesso\": true, \"message\": \"Nome e senha atualizados com sucesso\"}";
+            
+        } catch (Exception e) {
+            return "{\"erro\": \"Erro interno do servidor\"}";
+        }
+    }
+    
+    private static String excluirConta(String body) {
+        try {
+            String userId = extrairCampo(body, "userId");
+            String senhaAtual = extrairCampo(body, "senhaAtual");
+            
+            Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            
+            // Verificar senha atual
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT senha FROM usuario WHERE id = ?");
+            checkStmt.setInt(1, Integer.parseInt(userId));
+            ResultSet rs = checkStmt.executeQuery();
+            
+            if (!rs.next()) {
+                conn.close();
+                return "{\"erro\": \"Usuário não encontrado\"}";
+            }
+            
+            String senhaDb = rs.getString("senha");
+            if (!senhaDb.equals(hashSenha(senhaAtual))) {
+                conn.close();
+                return "{\"erro\": \"Senha incorreta\"}";
+            }
+            
+            // Excluir medicamentos do usuário primeiro
+            PreparedStatement deleteMedsStmt = conn.prepareStatement(
+                "DELETE FROM medicamento WHERE usuarioId = ?"
+            );
+            deleteMedsStmt.setInt(1, Integer.parseInt(userId));
+            deleteMedsStmt.executeUpdate();
+            
+            // Excluir usuário
+            PreparedStatement deleteUserStmt = conn.prepareStatement(
+                "DELETE FROM usuario WHERE id = ?"
+            );
+            deleteUserStmt.setInt(1, Integer.parseInt(userId));
+            deleteUserStmt.executeUpdate();
+            
+            conn.close();
+            
+            return "{\"sucesso\": true, \"message\": \"Conta excluída com sucesso\"}";
             
         } catch (Exception e) {
             return "{\"erro\": \"Erro interno do servidor\"}";

@@ -50,6 +50,10 @@ function Home({ onLogout }) {
     senhaAtual: '',
     novaSenha: ''
   })
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
+  const [deleteAccountData, setDeleteAccountData] = useState({
+    senhaAtual: ''
+  })
   const [novoLembrete, setNovoLembrete] = useState({
     titulo: '',
     descricao: '',
@@ -1221,7 +1225,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch(`http://localhost:8080/api/cadastros/${userId}/profile`, {
+      const response = await fetch('http://localhost:8080/usuarios/atualizar-senha-nome', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1267,6 +1271,76 @@ function Home({ onLogout }) {
           setEditProfile({ nome: '', senhaAtual: '', novaSenha: '' })
         } else {
           showToastMessage('⚠️ Senha atual incorreta!')
+        }
+      } else {
+        showToastMessage('⚠️ Usuário não encontrado!')
+      }
+    }
+  }
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault()
+    
+    if (!deleteAccountData.senhaAtual) {
+      showToastMessage('⚠️ Digite sua senha para confirmar!')
+      return
+    }
+    
+    if (!window.confirm('⚠️ ATENÇÃO: Esta ação é irreversível! Todos os seus dados serão perdidos permanentemente. Tem certeza que deseja excluir sua conta?')) {
+      return
+    }
+    
+    try {
+      const userId = sessionStorage.getItem('userId')
+      const response = await fetch('http://localhost:8080/usuarios/excluir-conta', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          senhaAtual: deleteAccountData.senhaAtual
+        })
+      })
+      
+      if (response.ok) {
+        showToastMessage('✅ Conta excluída com sucesso!')
+        setTimeout(() => {
+          sessionStorage.clear()
+          localStorage.removeItem('medicamentos')
+          localStorage.removeItem('medicamentosTomados')
+          localStorage.removeItem('lembretes')
+          localStorage.removeItem('perfilUsuario')
+          onLogout()
+        }, 2000)
+      } else {
+        const errorData = await response.json()
+        showToastMessage(errorData.erro || 'Senha incorreta')
+      }
+    } catch (error) {
+      // Fallback para localStorage
+      const usuariosCadastrados = JSON.parse(localStorage.getItem('usuariosCadastrados') || '[]')
+      const currentUser = sessionStorage.getItem('userName')
+      const userIndex = usuariosCadastrados.findIndex(u => u.nome === currentUser)
+      
+      if (userIndex !== -1) {
+        const user = usuariosCadastrados[userIndex]
+        const senhaAtualHash = await hashSenha(deleteAccountData.senhaAtual)
+        
+        if (user.senha === senhaAtualHash || user.senha === deleteAccountData.senhaAtual) {
+          // Remover usuário do localStorage
+          usuariosCadastrados.splice(userIndex, 1)
+          localStorage.setItem('usuariosCadastrados', JSON.stringify(usuariosCadastrados))
+          
+          showToastMessage('✅ Conta excluída com sucesso!')
+          setTimeout(() => {
+            sessionStorage.clear()
+            localStorage.removeItem('medicamentos')
+            localStorage.removeItem('medicamentosTomados')
+            localStorage.removeItem('lembretes')
+            localStorage.removeItem('perfilUsuario')
+            onLogout()
+          }, 2000)
+        } else {
+          showToastMessage('⚠️ Senha incorreta!')
         }
       } else {
         showToastMessage('⚠️ Usuário não encontrado!')
@@ -1354,6 +1428,26 @@ function Home({ onLogout }) {
             }}
           >
             ✏️ Editar Senha e Nome
+          </button>
+          <button 
+            onClick={() => {
+              setDeleteAccountData({ senhaAtual: '' })
+              setShowDeleteAccountModal(true)
+            }}
+            style={{
+              width: '100%',
+              marginTop: '10px',
+              padding: '12px 20px',
+              backgroundColor: '#ef4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600'
+            }}
+          >
+            🗑️ Excluir Conta
           </button>
           
 
@@ -1970,6 +2064,32 @@ function Home({ onLogout }) {
                 <div className="modal-buttons">
                   <button type="button" className="btn-cancel" onClick={() => setShowEditProfileModal(false)}>Cancelar</button>
                   <button type="submit" className="btn-save">Atualizar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        
+        {showDeleteAccountModal && (
+          <div className="modal-overlay" onClick={() => setShowDeleteAccountModal(false)}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <h3 style={{color: '#ef4444'}}>🗑️ Excluir Conta</h3>
+              <div style={{marginBottom: '20px', padding: '15px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px'}}>
+                <p style={{color: '#dc2626', fontWeight: '600', margin: '0 0 10px 0'}}>⚠️ ATENÇÃO:</p>
+                <p style={{color: '#7f1d1d', margin: '0', fontSize: '14px'}}>Esta ação é irreversível! Todos os seus medicamentos, histórico e dados pessoais serão perdidos permanentemente.</p>
+              </div>
+              <form onSubmit={handleDeleteAccount} className="profile-form">
+                <input
+                  type="password"
+                  placeholder="Digite sua senha atual para confirmar"
+                  value={deleteAccountData.senhaAtual}
+                  onChange={(e) => setDeleteAccountData({...deleteAccountData, senhaAtual: e.target.value})}
+                  required
+                  style={{borderColor: '#ef4444'}}
+                />
+                <div className="modal-buttons">
+                  <button type="button" className="btn-cancel" onClick={() => setShowDeleteAccountModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn-delete" style={{backgroundColor: '#ef4444'}}>Excluir Conta</button>
                 </div>
               </form>
             </div>
