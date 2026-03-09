@@ -566,7 +566,7 @@ function Home({ onLogout }) {
     try {
       const userId = sessionStorage.getItem('userId')
       if (userId) {
-        const response = await fetch(`http://localhost:8080/cadastros/${userId}`)
+        const response = await fetch(`http://localhost:8080/api/cadastros/${userId}`)
         if (response.ok) {
           const usuario = await response.json()
           setPerfil({
@@ -1146,7 +1146,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch(`http://localhost:8080/usuarios/${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/cadastros/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1225,7 +1225,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch('http://localhost:8080/usuarios/atualizar-senha-nome', {
+      const response = await fetch('http://localhost:8080/api/cadastros', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1292,7 +1292,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch('http://localhost:8080/usuarios/excluir-conta', {
+      const response = await fetch('http://localhost:8080/api/cadastros/', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1810,7 +1810,7 @@ function Home({ onLogout }) {
       <h2 className="section-title">Painel Administrativo</h2>
         <div className="admin-panel">
           <div className="card">
-            <h3>👥 Usuários Cadastrados ({adminData.usuarios.length})</h3>
+            <h3>👥 Usuários Cadastrados ({adminData.cadastro.length})</h3>
             <div className="usuarios-list">
               <div className="usuario-item header">
                 <span>Nome</span>
@@ -1904,6 +1904,24 @@ function Home({ onLogout }) {
               }}
             >
               ✏️ Editar
+            </button>
+            <button 
+              onClick={() => {
+                setDeleteAccountData({ senhaAtual: '' })
+                setShowDeleteAccountModal(true)
+              }}
+              style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                color: 'white',
+                border: '2px solid rgba(239, 68, 68, 0.3)',
+                padding: '0.5rem 1rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '600'
+              }}
+            >
+              🗑️ Excluir
             </button>
             <button 
               onClick={onLogout}

@@ -48,12 +48,8 @@ function Cadastro({ onGoToLogin, onLogin }) {
       const data = await response.json()
       
       if (response.ok) {
-        alert('Conta criada com sucesso! Bem-vindo ao PharmaLife!')
-       
-        console.log(data);  // Aqui você tem o objeto retornado pela API
-       // localStorage.setItem('token', data.token)
-       localStorage.setItem('usuario', JSON.stringify(data));
-        onLogin(data)
+        alert('Conta criada com sucesso! Faça login para continuar.')
+        onGoToLogin()
       } else {
         alert(data.erro || 'Erro ao criar conta')
       }

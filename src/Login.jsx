@@ -25,9 +25,10 @@ function Login({ onGoToCadastro, onLogin }) {
     try {
       const endpoint = isAdminLogin ? '/auth/admin/login' : '/auth/login'
       
-      const response = await fetch(`http://localhost:8080${endpoint}`, {
+      const response = await fetch(`http://localhost:8080/api/cadastros${endpoint}`, {
         method: 'POST',
         headers: {
+          
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
