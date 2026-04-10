@@ -80,33 +80,35 @@ function Home({ onLogout }) {
     }
   }
 
-  const marcarComoTomado = async (medicamentoId) => {
+  const marcarComoTomado = async (med) => {
+    const agendaId = med.agenda?.id
+    const medicamentoId = med.id
     try {
-      const usuarioId = sessionStorage.getItem('userId') || 1
-      const response = await fetch('http://localhost:8080/medicamentos/marcar-tomado', {
+      const now = new Date()
+      const response = await fetch(`http://localhost:8080/api/agenda/${agendaId}/medicamentos/${medicamentoId}/historico`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ medicamentoId, usuarioId })
+        body: JSON.stringify({
+          nome: med.nome,
+          dosagem: med.descricao || '',
+          observacoes: med.complemento || '',
+          horario: now.toTimeString().slice(0, 5),
+          status: 'PENDENTE'
+        })
       })
-      
       if (response.ok) {
         setMedicamentosTomados([...medicamentosTomados, medicamentoId])
         showToastMessage('✅ Medicamento marcado como tomado!')
         carregarHistoricoCompleto()
         carregarEstatisticas()
         carregarHistoricoRecente()
+      } else {
+        throw new Error('Erro no backend')
       }
     } catch (error) {
-      // Fallback para localStorage
       const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
-      const novoTomado = {
-        medicamentoId,
-        dataHora: new Date().toISOString(),
-        usuario: sessionStorage.getItem('userName')
-      }
-      medicamentosTomadosLocal.push(novoTomado)
+      medicamentosTomadosLocal.push({ medicamentoId, dataHora: new Date().toISOString(), usuario: sessionStorage.getItem('userName') })
       localStorage.setItem('medicamentosTomados', JSON.stringify(medicamentosTomadosLocal))
-      
       setMedicamentosTomados([...medicamentosTomados, medicamentoId])
       showToastMessage('✅ Medicamento marcado como tomado!')
       carregarEstatisticas()
@@ -166,7 +168,7 @@ function Home({ onLogout }) {
         }
         
         return {
-          nome: medicamento ? `${medicamento.nome} ${medicamento.dosagem}` : 'Medicamento',
+          nome: medicamento ? `${medicamento.nome} ${medicamento.descricao || medicamento.dosagem || ''}` : 'Medicamento',
           horario: dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           data: dataTexto,
           status: 'tomado'
@@ -187,30 +189,33 @@ function Home({ onLogout }) {
   const carregarMedicamentos = async () => {
     const userName = sessionStorage.getItem('userName')
     if (!userName) return
-    
     setLoading(true)
     try {
       let usuarioId = sessionStorage.getItem('userId')
-      if (!usuarioId) {
-        usuarioId = 1 // ID padrão para testes
-        sessionStorage.setItem('userId', usuarioId)
-      }
-      
-      const response = await fetch(`http://localhost:8080/medicamentos/usuario/${usuarioId}`)
-      if (response.ok) {
-        const medicamentosBackend = await response.json()
-        const medicamentosArray = Array.isArray(medicamentosBackend) ? medicamentosBackend : []
-        setMedicamentos(medicamentosArray)
-        // Sincronizar com localStorage
-        localStorage.setItem('medicamentos', JSON.stringify(medicamentosArray))
-      } else {
-        throw new Error('Backend não disponível')
-      }
+      if (!usuarioId) { usuarioId = 1; sessionStorage.setItem('userId', usuarioId) }
+
+      // 1. Busca agendas do usuário
+      const agendaResp = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}/agenda`)
+      if (!agendaResp.ok) throw new Error('Erro ao buscar agendas')
+      const agendas = await agendaResp.json()
+      const agendasArray = Array.isArray(agendas) ? agendas : []
+
+      // 2. Para cada agenda, busca medicamentos
+      const todasPromises = agendasArray.map(ag =>
+        fetch(`http://localhost:8080/api/agenda/${ag.id}/medicamentos`)
+          .then(r => r.ok ? r.json() : [])
+          .then(meds => (Array.isArray(meds) ? meds : []).map(m => ({ ...m, agenda: ag })))
+      )
+      const resultados = await Promise.all(todasPromises)
+      const todosMedicamentos = resultados.flat()
+      setMedicamentos(todosMedicamentos)
+      localStorage.setItem('medicamentos', JSON.stringify(todosMedicamentos))
     } catch (error) {
       console.log('Usando localStorage como fallback')
-      // Fallback para localStorage
       const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
-      const medicamentosUsuario = Array.isArray(medicamentosExistentes) ? medicamentosExistentes.filter(med => med.usuario === userName) : []
+      const medicamentosUsuario = Array.isArray(medicamentosExistentes)
+        ? medicamentosExistentes.filter(med => med.usuario === userName)
+        : []
       setMedicamentos(medicamentosUsuario)
     }
     setLoading(false)
@@ -220,10 +225,13 @@ function Home({ onLogout }) {
     carregarMedicamentos()
   }, [])
   
+  // Medicamento do backend: { id, nome, descricao (dosagem), tipo (frequencia), complemento, agenda: { horario } }
   const agendaMedicamentos = Array.isArray(medicamentos) ? medicamentos.map(med => ({
     ...med,
-    horario: med.horario,
-    status: 'próximo'
+    dosagem: med.descricao || med.dosagem || '',
+    horario: med.agenda?.horario || med.horario || '',
+    frequencia: med.tipo || med.frequencia || '',
+    status: med.statusMedicamento || 'próximo'
   })) : []
 
   const historicoRemedios = [
@@ -311,7 +319,7 @@ function Home({ onLogout }) {
                       {!jaTomado && (
                         <button 
                           className="btn-check" 
-                          onClick={() => marcarComoTomado(med.id)}
+                          onClick={() => marcarComoTomado(med)}
                         >
                           ✓
                         </button>
@@ -439,40 +447,66 @@ function Home({ onLogout }) {
     if (novoMedicamento.nome && novoMedicamento.dosagem && novoMedicamento.horario) {
       try {
         let usuarioId = sessionStorage.getItem('userId')
-        if (!usuarioId) {
-          usuarioId = 1
-          sessionStorage.setItem('userId', usuarioId)
+        if (!usuarioId) { usuarioId = 1; sessionStorage.setItem('userId', usuarioId) }
+
+        // 1. Cria ou reutiliza agenda do usuário
+        let agendaId = sessionStorage.getItem('agendaId')
+        if (!agendaId) {
+          const agendaResp = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}/agenda`)
+          const agendas = agendaResp.ok ? await agendaResp.json() : []
+          if (Array.isArray(agendas) && agendas.length > 0) {
+            agendaId = agendas[0].id
+            sessionStorage.setItem('agendaId', agendaId)
+          } else {
+            // Cria agenda padrão
+            const toLocalISO = (d) => d.toISOString().slice(0, 19) // remove o 'Z' final
+            const novaAgendaResp = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}/agenda`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nome: 'Agenda Principal',
+                dosagem: '-',
+                horario: (novoMedicamento.horario || '08:00') + ':00',
+                dataInicio: toLocalISO(new Date()),
+                dataFim: toLocalISO(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)),
+                observacoes: ''
+              })
+            })
+            if (!novaAgendaResp.ok) {
+              const errText = await novaAgendaResp.text()
+              console.error('Erro ao criar agenda:', errText)
+              throw new Error(`Erro ao criar agenda: ${errText}`)
+            }
+            const novaAgenda = await novaAgendaResp.json()
+            agendaId = novaAgenda.id
+            sessionStorage.setItem('agendaId', agendaId)
+          }
         }
-        
-        const response = await fetch('http://localhost:8080/medicamentos', {
+
+        // 2. Cria medicamento vinculado à agenda
+        const response = await fetch(`http://localhost:8080/api/agenda/${agendaId}/medicamentos`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...novoMedicamento, usuarioId: parseInt(usuarioId) })
+          body: JSON.stringify({
+            nome: novoMedicamento.nome,
+            descricao: novoMedicamento.dosagem,
+            tipo: novoMedicamento.frequencia || 'Diário',
+            complemento: novoMedicamento.duracao || ''
+          })
         })
-        
         if (response.ok) {
           showToastMessage('✨ Medicamento adicionado com sucesso!')
           setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
           await carregarMedicamentos()
           carregarHistoricoCompleto()
         } else {
-          throw new Error('Erro no backend')
+          const errText = await response.text()
+          console.error('Erro ao salvar medicamento:', errText)
+          showToastMessage(`⚠️ Erro ao salvar: ${errText}`)
         }
       } catch (error) {
-        console.log('Usando localStorage para adição')
-        // Fallback para localStorage
-        const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
-        const novoMed = {
-          id: Date.now(),
-          ...novoMedicamento,
-          usuario: sessionStorage.getItem('userName')
-        }
-        medicamentosExistentes.push(novoMed)
-        localStorage.setItem('medicamentos', JSON.stringify(medicamentosExistentes))
-        
-        showToastMessage('✨ Medicamento adicionado com sucesso!')
-        setNovoMedicamento({ nome: '', dosagem: '', horario: '', frequencia: 'Diário', duracao: '1 semana' })
-        await carregarMedicamentos()
+        console.error('Erro de conexão ao salvar medicamento:', error)
+        showToastMessage(`⚠️ Erro de conexão: ${error.message}`)
       }
     } else {
       showToastMessage('⚠️ Preencha todos os campos obrigatórios!')
@@ -509,12 +543,9 @@ function Home({ onLogout }) {
   const carregarHistoricoCompleto = async () => {
     try {
       let usuarioId = sessionStorage.getItem('userId')
-      if (!usuarioId) {
-        usuarioId = 1
-        sessionStorage.setItem('userId', usuarioId)
-      }
-      
-      const response = await fetch(`http://localhost:8080/historico/usuario/${usuarioId}`)
+      if (!usuarioId) { usuarioId = 1; sessionStorage.setItem('userId', usuarioId) }
+
+      const response = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}/historico`)
       if (response.ok) {
         const historico = await response.json()
         const historicoArray = Array.isArray(historico) ? historico : []
@@ -566,7 +597,7 @@ function Home({ onLogout }) {
     try {
       const userId = sessionStorage.getItem('userId')
       if (userId) {
-        const response = await fetch(`http://localhost:8080/api/cadastros/${userId}`)
+        const response = await fetch(`http://localhost:8080/api/usuarios/${userId}`)
         if (response.ok) {
           const usuario = await response.json()
           setPerfil({
@@ -629,10 +660,10 @@ function Home({ onLogout }) {
     setEditingMed(med)
     setEditMedicamento({
       nome: med.nome,
-      dosagem: med.dosagem,
-      horario: med.horario,
-      frequencia: med.frequencia,
-      observacao: med.observacao
+      dosagem: med.descricao || med.dosagem || '',
+      horario: med.agenda?.horario || med.horario || '',
+      frequencia: med.tipo || med.frequencia || 'Diário',
+      observacao: med.complemento || med.observacao || ''
     })
     setShowEditModal(true)
   }
@@ -640,12 +671,15 @@ function Home({ onLogout }) {
   const handleSaveEdit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`http://localhost:8080/medicamentos/${editingMed.id}`, {
+      const response = await fetch(`http://localhost:8080/api/medicamentos/${editingMed.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(editMedicamento)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: editMedicamento.nome,
+          descricao: editMedicamento.dosagem,
+          tipo: editMedicamento.frequencia,
+          complemento: editMedicamento.observacao || ''
+        })
       })
       
       if (response.ok) {
@@ -677,10 +711,9 @@ function Home({ onLogout }) {
   const handleDeleteMedicamento = async (medId) => {
     if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
       try {
-        const response = await fetch(`http://localhost:8080/medicamentos/${medId}`, {
+        const response = await fetch(`http://localhost:8080/api/medicamentos/${medId}`, {
           method: 'DELETE'
         })
-        
         if (response.ok) {
           showToastMessage('Medicamento excluído com sucesso!')
           await carregarMedicamentos()
@@ -690,7 +723,6 @@ function Home({ onLogout }) {
           showToastMessage(errorData.erro || 'Erro ao excluir medicamento')
         }
       } catch (error) {
-        // Fallback para localStorage
         const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
         const medicamento = medicamentosExistentes.find(med => med.id === medId)
         
@@ -721,10 +753,9 @@ function Home({ onLogout }) {
   const handleDeleteMedicamentoModal = async () => {
     if (window.confirm('Tem certeza que deseja excluir este medicamento?')) {
       try {
-        const response = await fetch(`http://localhost:8080/medicamentos/${editingMed.id}`, {
+        const response = await fetch(`http://localhost:8080/api/medicamentos/${editingMed.id}`, {
           method: 'DELETE'
         })
-        
         if (response.ok) {
           showToastMessage('Medicamento excluído com sucesso!')
           setShowEditModal(false)
@@ -842,7 +873,7 @@ function Home({ onLogout }) {
                 {!jaTomado && med.status !== 'tomado' && (
                   <button 
                     className="btn-take full-width" 
-                    onClick={() => marcarComoTomado(med.id)}
+                    onClick={() => marcarComoTomado(med)}
                   >
                     ✓ Marcar como Tomado
                   </button>
@@ -1066,27 +1097,37 @@ function Home({ onLogout }) {
     </div>
   )
 
+  const confirmarHistorico = async (id) => {
+    try {
+      const resp = await fetch(`http://localhost:8080/api/historico/${id}/confirmar`, { method: 'PATCH' })
+      if (resp.ok) { showToastMessage('✅ Uso confirmado!'); carregarHistoricoCompleto() }
+    } catch { showToastMessage('Erro ao confirmar') }
+  }
+
+  const ignorarHistorico = async (id) => {
+    try {
+      const resp = await fetch(`http://localhost:8080/api/historico/${id}/ignorar`, { method: 'PATCH' })
+      if (resp.ok) { showToastMessage('Registro ignorado.'); carregarHistoricoCompleto() }
+    } catch { showToastMessage('Erro ao ignorar') }
+  }
+
   const renderHistorico = () => {
-    const getAcaoIcon = (acao) => {
-      switch(acao) {
-        case 'ADICIONADO': return '➕'
-        case 'EDITADO': return '✏️'
-        case 'EXCLUIDO': return '🗑️'
-        case 'TOMADO': return '✅'
+    const getStatusIcon = (status) => {
+      switch(status) {
+        case 'CONFIRMADO': return '✅'
+        case 'IGNORADO': return '❌'
+        case 'PENDENTE': return '⏳'
         default: return '📋'
       }
     }
-    
-    const getAcaoColor = (acao) => {
-      switch(acao) {
-        case 'ADICIONADO': return '#10b981'
-        case 'EDITADO': return '#f59e0b'
-        case 'EXCLUIDO': return '#ef4444'
-        case 'TOMADO': return '#3b82f6'
+    const getStatusColor = (status) => {
+      switch(status) {
+        case 'CONFIRMADO': return '#10b981'
+        case 'IGNORADO': return '#ef4444'
+        case 'PENDENTE': return '#f59e0b'
         default: return '#6b7280'
       }
     }
-    
     return (
       <>
         <h2 className="section-title">Histórico de Medicamentos</h2>
@@ -1094,42 +1135,40 @@ function Home({ onLogout }) {
           {!Array.isArray(historicoCompleto) || historicoCompleto.length === 0 ? (
             <div className="card" style={{textAlign: 'center', padding: '40px', color: '#666'}}>
               <h3>📋 Nenhum histórico ainda</h3>
-              <p>Quando você adicionar, editar, excluir ou tomar medicamentos, o histórico aparecerá aqui.</p>
+              <p>Marque medicamentos como tomados para ver o histórico aqui.</p>
             </div>
           ) : (
-            (Array.isArray(historicoCompleto) ? historicoCompleto : []).map((item, index) => {
-              const dataHora = new Date(item.dataHora)
+            historicoCompleto.map((item, index) => {
+              const dataConfirmacao = item.dataConfirmacao ? new Date(item.dataConfirmacao) : null
               const hoje = new Date()
-              const ontem = new Date(hoje)
-              ontem.setDate(hoje.getDate() - 1)
-              
-              let dataTexto = dataHora.toLocaleDateString('pt-BR')
-              if (dataHora.toDateString() === hoje.toDateString()) {
-                dataTexto = 'Hoje'
-              } else if (dataHora.toDateString() === ontem.toDateString()) {
-                dataTexto = 'Ontem'
+              const ontem = new Date(hoje); ontem.setDate(hoje.getDate() - 1)
+              let dataTexto = dataConfirmacao ? dataConfirmacao.toLocaleDateString('pt-BR') : '—'
+              if (dataConfirmacao) {
+                if (dataConfirmacao.toDateString() === hoje.toDateString()) dataTexto = 'Hoje'
+                else if (dataConfirmacao.toDateString() === ontem.toDateString()) dataTexto = 'Ontem'
               }
-              
               return (
                 <div key={index} className="card historico-item">
                   <div className="historico-header">
-                    <div className="historico-icon" style={{backgroundColor: getAcaoColor(item.acao)}}>
-                      {getAcaoIcon(item.acao)}
+                    <div className="historico-icon" style={{backgroundColor: getStatusColor(item.status)}}>
+                      {getStatusIcon(item.status)}
                     </div>
                     <div className="historico-info">
-                      <h4>{item.nomeMedicamento} {item.dosagem}</h4>
-                      <span className="historico-acao">{item.acao}</span>
+                      <h4>{item.nome} {item.dosagem}</h4>
+                      <span className="historico-acao">{item.status}</span>
                     </div>
                     <div className="historico-time">
                       <span>{dataTexto}</span>
-                      <span>{dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                      {dataConfirmacao && <span>{dataConfirmacao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>}
                     </div>
                   </div>
-                  {item.detalhes && (
-                    <div className="historico-detalhes">
-                      <p>{item.detalhes}</p>
+                  {item.status === 'PENDENTE' && (
+                    <div style={{display: 'flex', gap: '8px', marginTop: '10px'}}>
+                      <button onClick={() => confirmarHistorico(item.id)} style={{flex: 1, padding: '8px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>✅ Confirmar</button>
+                      <button onClick={() => ignorarHistorico(item.id)} style={{flex: 1, padding: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>❌ Ignorar</button>
                     </div>
                   )}
+                  {item.observacoes && <div className="historico-detalhes"><p>{item.observacoes}</p></div>}
                 </div>
               )
             })
@@ -1146,7 +1185,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch(`http://localhost:8080/api/cadastros/${userId}`, {
+      const response = await fetch(`http://localhost:8080/api/usuarios/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1225,7 +1264,7 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch('http://localhost:8080/api/cadastros', {
+      const response = await fetch(`http://localhost:8080/api/usuarios/${userId}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1292,7 +1331,8 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
-      const response = await fetch('http://localhost:8080/api/cadastros/', {
+      console.log("userId:", userId)
+      const response = await fetch(`http://localhost:8080/api/usuarios/${userId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1310,6 +1350,7 @@ function Home({ onLogout }) {
           localStorage.removeItem('lembretes')
           localStorage.removeItem('perfilUsuario')
           onLogout()
+           window.location.href = '/cadastro'
         }, 2000)
       } else {
         const errorData = await response.json()

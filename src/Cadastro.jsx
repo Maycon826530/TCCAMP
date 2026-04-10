@@ -31,7 +31,7 @@ function Cadastro({ onGoToLogin, onLogin }) {
     }
     
     try {
-      const response = await fetch('http://localhost:8080/api/cadastros', {
+      const response = await fetch('http://localhost:8080/api/usuarios', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
