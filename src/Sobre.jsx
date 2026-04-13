@@ -3,9 +3,9 @@ import './Sobre.css'
 function Sobre() {
   const integrantes = [
     { nome: 'Maycon', papel: 'Programador' },
-    { nome: 'Adriel', papel: 'Designer' },
-    { nome: 'Felipe', papel: 'Designer' },
-    { nome: 'Caio', papel: 'Designer' },
+    { nome: 'Adriel', papel: 'Documentação' },
+    { nome: 'Felipe', papel: 'Design' },
+    { nome: 'Caio', papel: 'Documentação' },
     { nome: 'Murilo', papel: 'Gerente' }
   ]
 
