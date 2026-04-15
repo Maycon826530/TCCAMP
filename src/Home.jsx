@@ -835,49 +835,20 @@ function Home({ onLogout }) {
             const badge = getStatusBadge(med.status)
             const jaTomado = medicamentosTomados.includes(med.id)
             return (
-              <div key={index} className="card medication-card">
-                <div className="card-header">
-                  <h4>{med.nome}</h4>
-                  <div className="card-actions">
-                    <span className="badge" style={{backgroundColor: badge.color}}>{badge.text}</span>
-                    <div className="action-buttons">
-                      <button 
-                        className="btn-edit" 
-                        onClick={() => handleEditMedicamento(med)}
-                        title="Editar medicamento"
-                      >
-                        ✏️
-                      </button>
-                      <button 
-                        className="btn-delete-small" 
-                        onClick={() => handleDeleteMedicamento(med.id)}
-                        title="Excluir medicamento"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
+              <div key={index} className={`med-row ${jaTomado ? 'med-row--taken' : ''}`}>
+                <div className="med-row__icon">💊</div>
+                <div className="med-row__info">
+                  <span className="med-row__name">{med.nome}</span>
+                  <span className="med-row__meta">{med.dosagem} · {med.horario} · {med.frequencia}</span>
                 </div>
-                <div className="item">
-                  <span>Dosagem:</span>
-                  <span>{med.dosagem}</span>
+                <span className="badge" style={{backgroundColor: badge.color, flexShrink: 0}}>{badge.text}</span>
+                <div className="med-row__actions">
+                  {!jaTomado && med.status !== 'tomado' && (
+                    <button className="btn-take" onClick={() => marcarComoTomado(med)}>✓ Tomado</button>
+                  )}
+                  <button className="btn-edit" onClick={() => handleEditMedicamento(med)} title="Editar">✏️</button>
+                  <button className="btn-delete-small" onClick={() => handleDeleteMedicamento(med.id)} title="Excluir">🗑️</button>
                 </div>
-                <div className="item">
-                  <span>Horário:</span>
-                  <span>{med.horario}</span>
-                </div>
-                <div className="item">
-                  <span>Frequência:</span>
-                  <span>{med.frequencia}</span>
-                </div>
-                {!jaTomado && med.status !== 'tomado' && (
-                  <button 
-                    className="btn-take full-width" 
-                    onClick={() => marcarComoTomado(med)}
-                  >
-                    ✓ Marcar como Tomado
-                  </button>
-                )}
               </div>
             )
           })}
@@ -1648,7 +1619,7 @@ function Home({ onLogout }) {
           <div className="card-image">
             <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="35" fill="#3b82f6" opacity="0.8"/>
-              <path d="M50 30 Q60 30 60 40 Q60 50 50 50 M50 65 L50 70" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M50 30 Q60 30 60 40 Q60 50 50 50 M50 65 L50 70" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none"/>
             </svg>
           </div>
           <h3>Como usar o PharmaLife</h3>
@@ -1697,7 +1668,7 @@ function Home({ onLogout }) {
           <div className="card-image">
             <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="35" fill="#f59e0b" opacity="0.8"/>
-              <path d="M35 45 L45 55 L65 35" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/>
+              <path d="M35 45 L45 55 L65 35" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none"/>
             </svg>
           </div>
           <h3>Marcar como Tomado</h3>
@@ -1851,7 +1822,7 @@ function Home({ onLogout }) {
       <h2 className="section-title">Painel Administrativo</h2>
         <div className="admin-panel">
           <div className="card">
-            <h3>👥 Usuários Cadastrados ({adminData.cadastro.length})</h3>
+            <h3>👥 Usuários Cadastrados ({adminData.usuarios.length})</h3>
             <div className="usuarios-list">
               <div className="usuario-item header">
                 <span>Nome</span>

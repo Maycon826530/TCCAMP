@@ -564,11 +564,78 @@
   margin-top: -1rem;
 }
 
-.agenda, .historico, .farmacias, .configuracoes, .ajuda {
+.agenda {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.historico, .farmacias, .configuracoes, .ajuda {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   width: 100%;
+}
+
+/* Card compacto de medicamento na agenda */
+.med-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #3b82f6;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
+
+.med-row:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateX(2px);
+}
+
+.med-row--taken {
+  border-left-color: #10b981;
+  opacity: 0.7;
+}
+
+.med-row__icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.med-row__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.med-row__name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.med-row__meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.med-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
 }
 
 .help-section {
@@ -915,9 +982,22 @@
   box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
 }
 
-.medication-card {
-  position: relative;
+.med-row__actions .btn-take {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  min-height: 34px;
+  min-width: auto;
 }
+
+.med-row__actions .btn-edit,
+.med-row__actions .btn-delete-small {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+
 
 .card-header {
   display: flex;
