@@ -340,7 +340,7 @@
   transform: scale(1.1);
 }
 
-/* Gráfico circular de adesão */
+/* Grǭfico circular de adesǜo */
 .adherence-chart {
   display: flex;
   align-items: center;
@@ -407,7 +407,7 @@
   background: #f59e0b;
 }
 
-/* Histórico recente */
+/* Hist��rico recente */
 .recent-history {
   display: flex;
   flex-direction: column;
@@ -571,11 +571,19 @@
   width: 100%;
 }
 
-.historico, .farmacias, .configuracoes, .ajuda {
+.historico, .farmacias, .configuracoes {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   width: 100%;
+}
+
+.ajuda {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  align-items: start;
 }
 
 /* Card compacto de medicamento na agenda */
@@ -638,14 +646,6 @@
   flex-shrink: 0;
 }
 
-.help-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
-  width: 100%;
-  align-items: start;
-}
-
 .card {
   background: #ffffff;
   padding: 1.5rem;
@@ -662,6 +662,33 @@
 .card:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
+}
+
+.ajuda .card {
+  height: auto;
+  min-height: unset;
+  text-align: left;
+  overflow: visible;
+}
+
+.ajuda .card h3 {
+  text-align: left;
+}
+
+.ajuda .card-image {
+  margin: 0 0 1rem 0;
+}
+
+.help-tips {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  grid-column: 1 / -1;
+}
+
+.help-emergency {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  color: white;
+  grid-column: 1 / -1;
 }
 
 .card-image {
@@ -1322,6 +1349,7 @@
 .help-intro {
   background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
   color: white;
+  grid-column: 1 / -1;
 }
 
 .help-intro h3 {
@@ -1367,10 +1395,6 @@
   line-height: 1.5;
 }
 
-.help-tips {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-  color: white;
-}
 
 .help-tips h3 {
   color: white;
@@ -1401,10 +1425,6 @@
   line-height: 1.5;
 }
 
-.help-emergency {
-  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-  color: white;
-}
 
 .help-emergency h3 {
   color: white;
@@ -1562,7 +1582,7 @@
   margin: 0 1rem 1.5rem 1rem;
 }
 
-/* Estilos para histórico */
+/* Estilos para hist��rico */
 .historico-item {
   background: white;
   border-radius: 16px;

@@ -1611,167 +1611,6 @@ function Home({ onLogout }) {
     document.title = titles[activeSection] || 'PharmaLife'
   }, [activeSection])
 
-  const renderAjuda = () => (
-    <>
-      <h2 className="section-title">Ajuda</h2>
-      <div className="ajuda">
-        <div className="card">
-          <div className="card-image">
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="35" fill="#3b82f6" opacity="0.8"/>
-              <path d="M50 30 Q60 30 60 40 Q60 50 50 50 M50 65 L50 70" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none"/>
-            </svg>
-          </div>
-          <h3>Como usar o PharmaLife</h3>
-          <div className="item">
-            <span>Página Inicial:</span>
-            <span>Veja seus remédios do dia</span>
-          </div>
-          <div className="item">
-            <span>Agenda:</span>
-            <span>Adicione novos medicamentos</span>
-          </div>
-          <div className="item">
-            <span>Histórico:</span>
-            <span>Veja remédios anteriores</span>
-          </div>
-
-        </div>
-
-        <div className="card">
-          <div className="card-image">
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-              <rect x="30" y="40" width="40" height="20" rx="10" fill="#48bb78" opacity="0.8"/>
-              <circle cx="50" cy="50" r="6" fill="white"/>
-            </svg>
-          </div>
-          <h3>Adicionar Medicamento</h3>
-          <div className="item">
-            <span>1. Nome:</span>
-            <span>Digite o nome do remédio</span>
-          </div>
-          <div className="item">
-            <span>2. Dosagem:</span>
-            <span>Ex: 500mg, 1 comprimido</span>
-          </div>
-          <div className="item">
-            <span>3. Horário:</span>
-            <span>Escolha quando tomar</span>
-          </div>
-          <div className="item">
-            <span>4. Frequência:</span>
-            <span>Diário, 12h, 8h ou semanal</span>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-image">
-            <svg width="50" height="50" viewBox="0 0 100 100" fill="none">
-              <circle cx="50" cy="50" r="35" fill="#f59e0b" opacity="0.8"/>
-              <path d="M35 45 L45 55 L65 35" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none"/>
-            </svg>
-          </div>
-          <h3>Marcar como Tomado</h3>
-          <div className="item">
-            <span>Botão Verde:</span>
-            <span>Clique quando tomar o remédio</span>
-          </div>
-          <div className="item">
-            <span>Histórico:</span>
-            <span>Fica registrado automaticamente</span>
-          </div>
-          <div className="item">
-            <span>Adesão:</span>
-            <span>Acompanhe sua porcentagem</span>
-          </div>
-        </div>
-
-        <div className="card">
-          <h3>📋 Histórico - Ver Remédios Anteriores</h3>
-          <p className="help-text">
-            Aqui você pode ver todos os remédios que já tomou nos dias anteriores. 
-            É útil para mostrar ao médico ou para lembrar quando tomou algo.
-          </p>
-        </div>
-
-
-
-        <div className="card help-tips">
-          <h3>💡 Dicas Importantes para Usar Melhor</h3>
-          <div className="tip-item">
-            <span className="tip-icon">🔔</span>
-            <div>
-              <h4>Ative as Notificações</h4>
-              <p>Vá em Configurações e ative os lembretes. Assim você receberá avisos na hora de tomar os remédios.</p>
-            </div>
-          </div>
-          <div className="tip-item">
-            <span className="tip-icon">⏰</span>
-            <div>
-              <h4>Horários Regulares</h4>
-              <p>Tente sempre tomar os remédios nos mesmos horários todos os dias. Isso ajuda o tratamento.</p>
-            </div>
-          </div>
-          <div className="tip-item">
-            <span className="tip-icon">👨‍⚕️</span>
-            <div>
-              <h4>Consulte seu Médico</h4>
-              <p>Sempre que tiver dúvidas sobre remédios, consulte seu médico. Não pare de tomar sem orientação.</p>
-            </div>
-          </div>
-          <div className="tip-item">
-            <span className="tip-icon">📱</span>
-            <div>
-              <h4>Peça Ajuda</h4>
-              <p>Se tiver dificuldade para usar o aplicativo, peça ajuda a um familiar ou amigo. Eles podem te ensinar.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card help-seniors">
-          <h3>👴👵 Guia Especial para Idosos</h3>
-          <div className="senior-tip">
-            <h4>🔍 Como Ativar Letras Grandes</h4>
-            <p>No canto superior direito, clique no botão "🔍 Letras Grandes". Isso vai deixar tudo maior e mais fácil de ler.</p>
-          </div>
-          <div className="senior-tip">
-            <h4>📱 Peça Ajuda de Familiares</h4>
-            <p>Se tiver dificuldade, peça para um filho, neto ou vizinho te ajudar a configurar o aplicativo pela primeira vez.</p>
-          </div>
-          <div className="senior-tip">
-            <h4>⏰ Horários Simples</h4>
-            <p>Use horários fáceis de lembrar: 8h da manhã, 12h (meio-dia), 18h (6 da tarde). Evite horários complicados.</p>
-          </div>
-          <div className="senior-tip">
-            <h4>📝 Anote no Papel Também</h4>
-            <p>Além do aplicativo, mantenha uma lista dos seus remédios anotada no papel, como backup.</p>
-          </div>
-        </div>
-
-        <div className="card help-emergency">
-          <h3>🚨 Em Caso de Emergência</h3>
-          <p className="emergency-text">
-            Se você se sentir mal após tomar algum remédio ou esquecer de tomar um remédio importante:
-          </p>
-          <div className="emergency-actions">
-            <div className="emergency-item">
-              <span className="emergency-number">192</span>
-              <span>SAMU - Emergência Médica</span>
-            </div>
-            <div className="emergency-item">
-              <span className="emergency-number">193</span>
-              <span>Bombeiros</span>
-            </div>
-            <div className="emergency-item">
-              <span className="emergency-number">190</span>
-              <span>Polícia Militar</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  )
-
   const [adminData, setAdminData] = useState({ usuarios: [], estatisticas: {} })
 
   const carregarDadosAdmin = async () => {
@@ -1871,7 +1710,6 @@ function Home({ onLogout }) {
       case 'agenda': return renderAgenda()
       case 'historico': return renderHistorico()
       case 'configuracoes': return renderConfiguracoes()
-      case 'ajuda': return renderAjuda()
       case 'adicionar': return renderAdicionar()
       case 'sobre': return <Sobre />
       case 'admin': return renderAdmin()
@@ -1983,12 +1821,6 @@ function Home({ onLogout }) {
             onClick={() => setActiveSection('configuracoes')}
           >
             Configurações
-          </button>
-          <button 
-            className={activeSection === 'ajuda' ? 'active' : ''} 
-            onClick={() => setActiveSection('ajuda')}
-          >
-            Ajuda
           </button>
           <button 
             className={activeSection === 'sobre' ? 'active' : ''} 
