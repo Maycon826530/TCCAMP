@@ -3,6 +3,7 @@ import './Home.css'
 import './Accessibility.css'
 import './Adicionar.css'
 import Sobre from './Sobre'
+import pharmalifeLogo from './assets/pharmalife-logo.png'
 
 function Home({ onLogout }) {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -69,6 +70,18 @@ function Home({ onLogout }) {
     setTimeout(() => setShowToast(false), 3000)
   }
 
+  const getApiErrorMessage = async (response, fallback = 'Erro ao comunicar com o servidor') => {
+    const text = await response.text()
+    if (!text) return fallback
+
+    try {
+      const data = JSON.parse(text)
+      return data.erro || data.message || text
+    } catch {
+      return text
+    }
+  }
+
   const toggleAccessibilityMode = () => {
     const newMode = !accessibilityMode
     setAccessibilityMode(newMode)
@@ -97,9 +110,13 @@ function Home({ onLogout }) {
         })
       })
       if (response.ok) {
+        const historicoCriado = await response.json()
+        if (historicoCriado?.id) {
+          await fetch(`http://localhost:8080/api/historico/${historicoCriado.id}/confirmar`, { method: 'PATCH' })
+        }
         setMedicamentosTomados([...medicamentosTomados, medicamentoId])
         showToastMessage('✅ Medicamento marcado como tomado!')
-        carregarHistoricoCompleto()
+        await carregarHistoricoCompleto()
         carregarEstatisticas()
         carregarHistoricoRecente()
       } else {
@@ -121,6 +138,11 @@ function Home({ onLogout }) {
       'tomado': { color: '#10b981', text: 'Tomado' },
       'pendente': { color: '#f59e0b', text: 'Pendente' },
       'atrasado': { color: '#ef4444', text: 'Atrasado' },
+      'ATIVO': { color: '#10b981', text: 'Ativo' },
+      'INATIVO': { color: '#6b7280', text: 'Inativo' },
+      'PENDENTE': { color: '#f59e0b', text: 'Pendente' },
+      'CONFIRMADO': { color: '#10b981', text: 'Confirmado' },
+      'IGNORADO': { color: '#ef4444', text: 'Ignorado' },
       'próximo': { color: '#3b82f6', text: 'Próximo' },
       'aberta': { color: '#10b981', text: 'Aberta' },
       'fechada': { color: '#6b7280', text: 'Fechada' }
@@ -130,19 +152,30 @@ function Home({ onLogout }) {
 
   const carregarEstatisticas = () => {
     const userName = sessionStorage.getItem('userName')
-    const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
-    const medicamentosUsuario = medicamentosTomadosLocal.filter(mt => mt.usuario === userName)
-    
-    const totalMedicamentos = medicamentos.length * 7 // 7 dias
-    const tomados = medicamentosUsuario.length
+    let totalMedicamentos = 0
+    let tomados = 0
+    let perdidos = 0
+
+    if (Array.isArray(historicoCompleto) && historicoCompleto.length > 0) {
+      tomados = historicoCompleto.filter(h => h.status === 'CONFIRMADO').length
+      perdidos = historicoCompleto.filter(h => h.status === 'IGNORADO').length
+      const pendentes = historicoCompleto.filter(h => h.status === 'PENDENTE').length
+      totalMedicamentos = tomados + perdidos + pendentes
+    } else {
+      const medicamentosTomadosLocal = JSON.parse(localStorage.getItem('medicamentosTomados') || '[]')
+      const medicamentosUsuario = medicamentosTomadosLocal.filter(mt => mt.usuario === userName)
+      totalMedicamentos = medicamentos.length * 7 // 7 dias
+      tomados = medicamentosUsuario.length
+    }
+
     const adesao = totalMedicamentos > 0 ? Math.round((tomados / totalMedicamentos) * 100) : 0
     
-    setEstatisticas({ adesao, tomados, total: totalMedicamentos })
+    setEstatisticas({ adesao, tomados, total: totalMedicamentos, perdidos })
   }
   
   useEffect(() => {
     carregarEstatisticas()
-  }, [medicamentos])
+  }, [medicamentos, historicoCompleto])
 
   const [historicoRecente, setHistoricoRecente] = useState([])
   
@@ -184,7 +217,28 @@ function Home({ onLogout }) {
     carregarHistoricoRecente()
   }, [medicamentos])
   
-  const ultimosRemedios = historicoRecente
+  const ultimosRemedios = Array.isArray(historicoCompleto) && historicoCompleto.length > 0
+    ? historicoCompleto
+        .filter(h => h.status === 'PENDENTE' || h.status === 'CONFIRMADO')
+        .sort((a, b) => new Date(b.dataConfirmacao || b.dataHora || 0) - new Date(a.dataConfirmacao || a.dataHora || 0))
+        .slice(0, 3)
+        .map(h => {
+          const dataHora = new Date(h.dataConfirmacao || h.dataHora || Date.now())
+          const hoje = new Date()
+          const ontem = new Date(hoje)
+          ontem.setDate(hoje.getDate() - 1)
+          let dataTexto = 'Hoje'
+          if (dataHora.toDateString() === ontem.toDateString()) dataTexto = 'Ontem'
+          else if (dataHora.toDateString() !== hoje.toDateString()) dataTexto = dataHora.toLocaleDateString('pt-BR')
+
+          return {
+            nome: `${h.nome || 'Medicamento'} ${h.dosagem || ''}`.trim(),
+            horario: dataHora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            data: dataTexto,
+            status: h.status
+          }
+        })
+    : historicoRecente
 
   const carregarMedicamentos = async () => {
     const userName = sessionStorage.getItem('userName')
@@ -247,6 +301,8 @@ function Home({ onLogout }) {
     const agora = new Date()
     const hora = agora.getHours()
     const userName = sessionStorage.getItem('userName') || 'Usuário'
+    const medicamentosTomadosIds = new Set(medicamentosTomados)
+    const totalPendentes = Math.max(0, agendaMedicamentos.filter(med => !medicamentosTomadosIds.has(med.id)).length)
     let saudacao = 'Bom dia'
     if (hora >= 12 && hora < 18) saudacao = 'Boa tarde'
     else if (hora >= 18) saudacao = 'Boa noite'
@@ -270,7 +326,7 @@ function Home({ onLogout }) {
             <div className="stat-card">
               <div className="stat-icon">⏰</div>
               <div className="stat-info">
-                <span className="stat-number">{medicamentos.length - medicamentosTomados.length}</span>
+                <span className="stat-number">{totalPendentes}</span>
                 <span className="stat-label">Pendentes</span>
               </div>
             </div>
@@ -450,10 +506,10 @@ function Home({ onLogout }) {
         if (!usuarioId) { usuarioId = 1; sessionStorage.setItem('userId', usuarioId) }
 
         // 1. Cria ou reutiliza agenda do usuário
+        sessionStorage.removeItem('agendaId')
         let agendaId = sessionStorage.getItem('agendaId')
         if (!agendaId) {
-          const agendaResp = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}/agenda`)
-          const agendas = agendaResp.ok ? await agendaResp.json() : []
+          const agendas = []
           if (Array.isArray(agendas) && agendas.length > 0) {
             agendaId = agendas[0].id
             sessionStorage.setItem('agendaId', agendaId)
@@ -464,12 +520,12 @@ function Home({ onLogout }) {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                nome: 'Agenda Principal',
-                dosagem: '-',
+                nome: novoMedicamento.nome,
+                dosagem: novoMedicamento.dosagem,
                 horario: (novoMedicamento.horario || '08:00') + ':00',
                 dataInicio: toLocalISO(new Date()),
                 dataFim: toLocalISO(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)),
-                observacoes: ''
+                observacoes: novoMedicamento.duracao || ''
               })
             })
             if (!novaAgendaResp.ok) {
@@ -689,8 +745,7 @@ function Home({ onLogout }) {
         await carregarMedicamentos()
         carregarHistoricoCompleto()
       } else {
-        const errorData = await response.json()
-        showToastMessage(errorData.erro || 'Erro ao atualizar medicamento')
+        showToastMessage(await getApiErrorMessage(response, 'Erro ao atualizar medicamento'))
       }
     } catch (error) {
       console.log('Usando localStorage para edição')
@@ -719,8 +774,7 @@ function Home({ onLogout }) {
           await carregarMedicamentos()
           setTimeout(() => carregarHistoricoCompleto(), 500)
         } else {
-          const errorData = await response.json()
-          showToastMessage(errorData.erro || 'Erro ao excluir medicamento')
+          showToastMessage(await getApiErrorMessage(response, 'Erro ao excluir medicamento'))
         }
       } catch (error) {
         const medicamentosExistentes = JSON.parse(localStorage.getItem('medicamentos') || '[]')
@@ -763,8 +817,7 @@ function Home({ onLogout }) {
           await carregarMedicamentos()
           setTimeout(() => carregarHistoricoCompleto(), 500)
         } else {
-          const errorData = await response.json()
-          showToastMessage(errorData.erro || 'Erro ao excluir medicamento')
+          showToastMessage(await getApiErrorMessage(response, 'Erro ao excluir medicamento'))
         }
       } catch (error) {
         // Registrar exclusão no histórico
@@ -1156,14 +1209,16 @@ function Home({ onLogout }) {
     
     try {
       const userId = sessionStorage.getItem('userId')
+      const usuarioAtualResp = await fetch(`http://localhost:8080/api/usuarios/${userId}`)
+      const usuarioAtual = usuarioAtualResp.ok ? await usuarioAtualResp.json() : {}
       const response = await fetch(`http://localhost:8080/api/usuarios/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nome: perfil.nome,
-          senha: perfil.senha === '******' ? undefined : perfil.senha,
+          senha: perfil.senha === '******' ? usuarioAtual.senha : perfil.senha,
           email: perfil.email,
-          idade: perfil.idade,
+          idade: parseInt(perfil.idade) || usuarioAtual.idade || null,
           comorbidade: perfil.comorbidade
         })
       })
@@ -1253,8 +1308,7 @@ function Home({ onLogout }) {
         setShowEditProfileModal(false)
         setEditProfile({ nome: '', senhaAtual: '', novaSenha: '' })
       } else {
-        const errorData = await response.json()
-        showToastMessage(errorData.erro || 'Senha atual incorreta')
+        showToastMessage(await getApiErrorMessage(response, 'Senha atual incorreta'))
       }
     } catch (error) {
       // Fallback para localStorage
@@ -1324,8 +1378,7 @@ function Home({ onLogout }) {
            window.location.href = '/cadastro'
         }, 2000)
       } else {
-        const errorData = await response.json()
-        showToastMessage(errorData.erro || 'Senha incorreta')
+        showToastMessage(await getApiErrorMessage(response, 'Senha incorreta'))
       }
     } catch (error) {
       // Fallback para localStorage
@@ -1615,7 +1668,7 @@ function Home({ onLogout }) {
 
   const carregarDadosAdmin = async () => {
     try {
-      const response = await fetch('http://localhost:8080/admin/usuarios')
+      const response = await fetch('http://localhost:8080/api/usuarios')
       if (response.ok) {
         const usuarios = await response.json()
         const agora = new Date()
@@ -1722,7 +1775,7 @@ function Home({ onLogout }) {
       <aside className="sidebar">
         <div className="sidebar-header">
           <div className="logo-section">
-            <div className="logo-icon">💊</div>
+            <img className="logo-icon" src={pharmalifeLogo} alt="Logo PharmaLife" />
             <h1>PharmaLife</h1>
           </div>
           <div style={{display: 'flex', flexDirection: 'column', gap: '8px'}}>

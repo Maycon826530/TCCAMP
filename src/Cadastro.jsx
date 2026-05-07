@@ -45,7 +45,13 @@ function Cadastro({ onGoToLogin, onLogin }) {
         })
       })
       
-      const data = await response.json()
+      const responseText = await response.text()
+      let data = {}
+      try {
+        data = responseText ? JSON.parse(responseText) : {}
+      } catch {
+        data = { erro: responseText }
+      }
       
       if (response.ok) {
         alert('Conta criada com sucesso! Faça login para continuar.')
